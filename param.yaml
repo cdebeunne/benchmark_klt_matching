@@ -8,6 +8,8 @@ enable_matcher: True
 nimages: 100
 
 # Parameters of the keypoint detector
+detector: "orb"
+threshold_fast: 50
 
 npoints: 500
 scale_factor: 1.2

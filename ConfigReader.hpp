@@ -7,6 +7,8 @@
 struct Config {
     std::string dataset_path;
 
+    std::string detector;
+    int threshold_fast;
     int npoints;
     float scale_factor;
     int nlevels_pyramids;
@@ -38,6 +40,8 @@ Config readParameterFile(const std::string path){
     config.nimages = yaml_file["nimages"].as<int>();
 
     // Config detector
+    config.detector = yaml_file["detector"].as<std::string>();
+    config.threshold_fast = yaml_file["threshold_fast"].as<int>();
     config.npoints = yaml_file["npoints"].as<int>();
     config.scale_factor = yaml_file["scale_factor"].as<float>();
     config.nlevels_pyramids = yaml_file["nlevels_pyramids"].as<int>();

@@ -44,7 +44,17 @@ int main(int argc, char** argv){
     cv::Mat img_curr, img_prev;
 
     // Initialize the detector
-    cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create(config.npoints,
+    cv::Ptr<cv::FeatureDetector> detector;
+    if (config.detector == "fast"){
+        detector = cv::FastFeatureDetector::create(config.threshold_fast);
+    }
+    else if (config.detector == "orb"){
+        detector = cv::ORB::create(config.npoints,
+                                            config.scale_factor,
+                                            config.nlevels_pyramids,
+                                            31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+    }
+    cv::Ptr<cv::FeatureDetector> descriptor = cv::ORB::create(config.npoints,
                                             config.scale_factor,
                                             config.nlevels_pyramids,
                                             31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
@@ -70,7 +80,8 @@ int main(int argc, char** argv){
 
         if (counter == 0){
             img_prev = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-            detector->detectAndCompute(img_prev, cv::Mat(), keypoints_prev, descriptors_prev);
+            detector->detect(img_prev, keypoints_prev);
+            descriptor->compute(img_prev, keypoints_prev, descriptors_prev);
             results << 0 << "," << keypoints_prev.size() << ",\n";
             counter ++;
             continue;
@@ -121,7 +132,7 @@ int main(int argc, char** argv){
             detector->detect(img_curr, keypoints_curr);
 
             // Description
-            detector->compute(img_curr, keypoints_curr, descriptors_curr);
+            descriptor->compute(img_curr, keypoints_curr, descriptors_curr);
 
             int nmatched_features = match(keypoints_prev, keypoints_curr, descriptors_prev, descriptors_curr,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
@@ -169,7 +180,7 @@ int main(int argc, char** argv){
                     keypoints_prev.push_back(keypoint);
                 }
             }
-            detector->compute(img_curr, keypoints_prev, descriptors_prev);
+            descriptor->compute(img_curr, keypoints_prev, descriptors_prev);
         }
 
         // Set curr as previous (only for image this time)

@@ -15,7 +15,7 @@ std::vector<int> getKeypointsInBox(int search_width, int search_height, cv::KeyP
     int y = kp.pt.y;
     std::vector<int> indices_in_box;
 
-    for (int i = 0; i < kps.size(); i++){
+    for (size_t i = 0; i < kps.size(); i++){
         cv::KeyPoint keypoint = kps.at(i);
         if((keypoint.pt.x < x - search_width/2) || (keypoint.pt.x > x + search_width/2) 
             || (keypoint.pt.y < y - search_height/2) || (keypoint.pt.y > y + search_height/2))
@@ -35,7 +35,7 @@ int match(std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_cu
     std::vector<cv::KeyPoint> kps_prev_new, kps_curr_new;
     cv::Mat desc_prev_new, desc_curr_new;
 
-    for (int i=0; i < kps_prev.size(); i++){
+    for (size_t i=0; i < kps_prev.size(); i++){
         cv::KeyPoint kp_prev = kps_prev.at(i);
         cv::Mat descriptor_prev = descriptors_prev.row(i);
 

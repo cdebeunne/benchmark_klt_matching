@@ -44,7 +44,17 @@ int main(int argc, char** argv){
     cv::Mat img_curr, img_prev;
 
     // Initialize the detector
-    cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create(config.npoints,
+    cv::Ptr<cv::FeatureDetector> detector;
+    if (config.detector == "fast"){
+        detector = cv::FastFeatureDetector::create(config.threshold_fast);
+    }
+    else if (config.detector == "orb"){
+        detector = cv::ORB::create(config.npoints,
+                                            config.scale_factor,
+                                            config.nlevels_pyramids,
+                                            31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+    }
+    cv::Ptr<cv::FeatureDetector> descriptor = cv::ORB::create(config.npoints,
                                             config.scale_factor,
                                             config.nlevels_pyramids,
                                             31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
@@ -55,7 +65,6 @@ int main(int argc, char** argv){
     float avg_track = 0;
     float avg_match = 0;
     float dt_detect = 0;
-    float dt_compute = 0;
     float dt_match = 0;
     float dt_track = 0;
     float inliers_match = 0;
@@ -72,23 +81,20 @@ int main(int argc, char** argv){
 
         if (counter == 0){
             img_prev = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-            detector->detectAndCompute(img_prev, cv::Mat(), keypoints_prev, descriptors_prev);
+            detector->detect(img_prev, keypoints_prev);
+            descriptor->compute(img_prev, keypoints_prev, descriptors_prev);
             counter ++;
             continue;
         }
 
+        img_curr = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
+
         // Detection
         timer.start();
-        img_curr = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
         detector->detect(img_curr, keypoints_curr);
         timer.stop();
         dt_detect += timer.elapsedSeconds();
-
-        // Description
-        timer.start();
-        detector->compute(img_curr, keypoints_curr, descriptors_curr);
-        timer.stop();
-        dt_compute += timer.elapsedSeconds();
+        
 
         if (config.enable_tracker){
             // Create cv point list for tracking, we initialize optical flow with previous keypoints
@@ -136,11 +142,15 @@ int main(int argc, char** argv){
         }
 
         if (config.enable_matcher){
-            std::vector<cv::KeyPoint> keypoints_curr_match = keypoints_curr;
             std::vector<cv::KeyPoint> keypoints_prev_match = keypoints_prev;
-            cv::Mat descriptors_curr_match = descriptors_curr;
             cv::Mat descriptors_prev_match = descriptors_prev;
+
+            // Compute descriptors and matching 
             timer.start();
+            descriptor->compute(img_curr, keypoints_curr, descriptors_curr);
+            std::vector<cv::KeyPoint> keypoints_curr_match = keypoints_curr; 
+            cv::Mat descriptors_curr_match = descriptors_curr;
+
             int nmatched_features = match(keypoints_prev_match, keypoints_curr_match, descriptors_prev_match, descriptors_curr_match,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
             timer.stop();
@@ -149,7 +159,7 @@ int main(int argc, char** argv){
 
             // Check inliers with essential
             std::vector<cv::Point2f> p2f_curr, p2f_prev;
-            for (int k=0; k<keypoints_prev_match.size(); k++){
+            for (size_t k=0; k<keypoints_prev_match.size(); k++){
                 p2f_prev.push_back(keypoints_prev_match.at(k).pt);
                 p2f_curr.push_back(keypoints_curr_match.at(k).pt);
             }
@@ -186,7 +196,6 @@ int main(int argc, char** argv){
 
     avg_match /= counter;
     avg_track /= counter;
-    dt_compute /= counter;
     dt_detect /= counter;
     dt_match /= counter;
     dt_track /= counter;
@@ -204,8 +213,6 @@ int main(int argc, char** argv){
     std::cout << inliers_match << std::endl;
     std::cout << "Time to detect" << std::endl;
     std::cout << dt_detect << std::endl;
-    std::cout << "Time to compute" << std::endl;
-    std::cout << dt_compute << std::endl;
     std::cout << "Time to track" << std::endl;
     std::cout << dt_track << std::endl;
     std::cout << "Time to match" << std::endl;
