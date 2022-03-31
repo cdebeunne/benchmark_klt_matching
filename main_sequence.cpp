@@ -71,6 +71,7 @@ int main(int argc, char** argv){
         if (counter == 0){
             img_prev = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             detector->detectAndCompute(img_prev, cv::Mat(), keypoints_prev, descriptors_prev);
+            results << 0 << "," << keypoints_prev.size() << ",\n";
             counter ++;
             continue;
         }
@@ -88,22 +89,35 @@ int main(int argc, char** argv){
             int ntracked_features = track(img_prev, img_curr, p2f_prev, p2f_curr,
                                     config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
-            
+            // We need at least 5 kp to compute Essential
+            if (p2f_curr.size() < 5) break;
+
+            // Filtering with Essential Matrix
+            cv::Mat cvMask, E;
+            E = cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
+                                 0.99, 1.0, cvMask);
+            std::vector<cv::Point2f> p2f_curr_filtered;
+
+            for (size_t k=0; k<p2f_prev.size(); k++){
+                if (cvMask.at<bool>(k) == 1){
+                    p2f_curr_filtered.push_back(p2f_curr.at(k));
+                }
+            }
+
             results << counter << ","
-                    << ntracked_features << ", \n";
+                    << cv::countNonZero(cvMask) << ", \n";
 
             // Keypoint current are now the one that were tracked
             keypoints_prev.clear();
-            for (size_t i = 0; i < p2f_curr.size(); i++){
+            for (size_t i = 0; i < p2f_curr_filtered.size(); i++){
                 cv::KeyPoint keypoint;
-                keypoint.pt = p2f_curr.at(i);
+                keypoint.pt = p2f_curr_filtered.at(i);
                 keypoints_prev.push_back(keypoint);
             }
         }
 
         if (config.enable_matcher){
             // Detection
-            img_curr = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             detector->detect(img_curr, keypoints_curr);
 
             // Description
@@ -111,17 +125,59 @@ int main(int argc, char** argv){
 
             int nmatched_features = match(keypoints_prev, keypoints_curr, descriptors_prev, descriptors_curr,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
-            keypoints_prev = keypoints_curr;
-            descriptors_prev = descriptors_curr;
 
+
+            if (config.debug){
+                std::cout << "Number of matches" << std::endl;
+                std::cout << nmatched_features << std::endl;
+
+                // Image Display
+                cv::Mat img_matches;
+                std::vector<cv::DMatch> good_matches;
+                for (size_t i = 0; i < keypoints_curr.size(); i++){
+                    cv::DMatch match(i,i,1);
+                    good_matches.push_back(match);
+                }
+                cv::drawMatches(img_prev, keypoints_prev, img_curr, keypoints_curr, good_matches, img_matches, cv::Scalar::all(-1),
+                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+                cv::imshow( "Good Matches", img_matches);
+                cv::waitKey(0);
+            }
+
+            // We need at least 5 kp to compute Essential
+            if (keypoints_curr.size() < 5) break;
+
+            // Filtering with Essential Matrix
+            std::vector<cv::Point2f> p2f_curr, p2f_prev;
+            for (size_t k=0; k<keypoints_prev.size(); k++){
+                p2f_prev.push_back(keypoints_prev.at(k).pt);
+                p2f_curr.push_back(keypoints_curr.at(k).pt);
+            }
+            cv::Mat cvMask, E;
+            E = cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
+                                 0.99, 1.0, cvMask);
+            std::vector<cv::Point2f> p2f_curr_filtered;
+            for (size_t k=0; k<p2f_prev.size(); k++){
+                if (cvMask.at<bool>(k) == 1){
+                    p2f_curr_filtered.push_back(p2f_curr.at(k));
+                }
+            }
             results << counter << ","
-                    << nmatched_features << ", \n";
+                    << cv::countNonZero(cvMask) << ", \n";
+
+            // Keypoint previouse are now the one that were matched
+            keypoints_prev.clear();
+            for (size_t i = 0; i < p2f_curr_filtered.size(); i++){
+                cv::KeyPoint keypoint;
+                keypoint.pt = p2f_curr_filtered.at(i);
+                keypoints_prev.push_back(keypoint);
+            }
+            detector->compute(img_curr, keypoints_prev, descriptors_prev);
         }
 
         // Set curr as previous (only for image this time)
         img_prev = img_curr;
         counter++;
-        
     }
 
     results.close();

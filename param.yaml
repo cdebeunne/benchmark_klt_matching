@@ -3,13 +3,13 @@ dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
 
 # choose execution mode
 debug: True
-enable_tracker: True
-enable_matcher: False
+enable_tracker: False
+enable_matcher: True
 nimages: 100
 
 # Parameters of the keypoint detector
 
-npoints: 500
+npoints: 391
 scale_factor: 1.2
 nlevels_pyramids: 8
 
