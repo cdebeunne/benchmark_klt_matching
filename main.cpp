@@ -23,8 +23,6 @@
 #include <vector>
 #include <numeric>
 
-
-
 int main(int argc, char** argv){
 
     Timer timer;
@@ -41,8 +39,7 @@ int main(int argc, char** argv){
     Config config = readParameterFile("/home/cesar/Documents/phd/developpement/benchmark_klt_matching/param.yaml");
 
     // path and loader of the EUROC sequence
-    std::string euroc_path = "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0/data/";
-    std::vector<std::string> img_list = EUROC_img_loader("/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0/data.csv");
+    std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);
     cv::Mat img_curr, img_prev;
 
     // Initialize the detector
@@ -66,7 +63,7 @@ int main(int argc, char** argv){
     int counter = 0;
     std::string img_path;
     for (const auto & img_name : img_list){
-        img_path = euroc_path + img_name;
+        img_path = config.dataset_path + "/data/" + img_name;
         if (counter > config.nimages) break;
 
         // Matches variable for vizu
@@ -140,8 +137,10 @@ int main(int argc, char** argv){
         if (config.enable_matcher){
             std::vector<cv::KeyPoint> keypoints_curr_match = keypoints_curr;
             std::vector<cv::KeyPoint> keypoints_prev_match = keypoints_prev;
+            cv::Mat descriptors_curr_match = descriptors_curr;
+            cv::Mat descriptors_prev_match = descriptors_prev;
             timer.start();
-            int nmatched_features = match(keypoints_prev_match, keypoints_curr_match, descriptors_prev, descriptors_curr,
+            int nmatched_features = match(keypoints_prev_match, keypoints_curr_match, descriptors_prev_match, descriptors_curr_match,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
             timer.stop();
             dt_match += timer.elapsedSeconds();
@@ -177,7 +176,7 @@ int main(int argc, char** argv){
             }
         }
 
-        // Set curr as previous
+        // Set curr as previous 
         img_prev = img_curr;
         keypoints_prev = keypoints_curr;
         descriptors_prev = descriptors_curr;

@@ -8,7 +8,7 @@ std::vector<std::string> EUROC_img_loader(std::string data_path){
 
     std::vector<std::string> img_list;
 
-    std::ifstream cam(data_path);
+    std::ifstream cam(data_path+"/data.csv");
     std::string header;
     std::getline(cam,header);
     for(std::string line;getline(cam,line);) {

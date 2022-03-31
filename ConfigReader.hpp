@@ -5,6 +5,8 @@
 
 // This structure contains the configuration parameters located in the config file.
 struct Config {
+    std::string dataset_path;
+
     int npoints;
     float scale_factor;
     int nlevels_pyramids;
@@ -29,6 +31,7 @@ Config readParameterFile(const std::string path){
     Config config;
 
     // Script mode
+    config.dataset_path = yaml_file["dataset_path"].as<std::string>();
     config.debug = yaml_file["debug"].as<bool>();
     config.enable_matcher = yaml_file["enable_matcher"].as<bool>();
     config.enable_tracker = yaml_file["enable_tracker"].as<bool>();
