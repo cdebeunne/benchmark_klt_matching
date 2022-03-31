@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 #include <numeric>
-
+#include <filesystem>
 
 
 int main(int argc, char** argv){
@@ -37,7 +37,7 @@ int main(int argc, char** argv){
     cv::Point2d principal_pt(K(0,2), K(1,2));
 
     // Load config
-    Config config = readParameterFile("/home/cesar/Documents/phd/developpement/benchmark_klt_matching/param.yaml");
+    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+"param.yaml");
 
     // path and loader of the EUROC sequence
     std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);
