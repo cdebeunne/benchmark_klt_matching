@@ -156,21 +156,18 @@ int main(int argc, char** argv){
             cv::Mat cvMask, E;
             E = cv::findEssentialMat(p2f_prev, p2f_curr, focal_length, principal_pt, cv::RANSAC,
                                  0.99, 1.0, cvMask);
-            std::vector<cv::Point2f> p2f_curr_filtered;
-            for (size_t k=0; k<p2f_prev.size(); k++){
-                if (cvMask.at<bool>(k) == 1){
-                    p2f_curr_filtered.push_back(p2f_curr.at(k));
-                }
-            }
+
             results << counter << ","
                     << cv::countNonZero(cvMask) << ", \n";
 
             // Keypoint previouse are now the one that were matched
             keypoints_prev.clear();
-            for (size_t i = 0; i < p2f_curr_filtered.size(); i++){
-                cv::KeyPoint keypoint;
-                keypoint.pt = p2f_curr_filtered.at(i);
-                keypoints_prev.push_back(keypoint);
+            for (size_t i = 0; i < p2f_curr.size(); i++){
+                if (cvMask.at<bool>(i) == 1){
+                    cv::KeyPoint keypoint;
+                    keypoint = keypoints_curr.at(i);
+                    keypoints_prev.push_back(keypoint);
+                }
             }
             detector->compute(img_curr, keypoints_prev, descriptors_prev);
         }
