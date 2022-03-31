@@ -1,0 +1,28 @@
+# Parameter file for benchmarking
+
+# choose execution mode
+debug: False
+enable_tracker: False
+enable_matcher: True
+nimages: 100
+
+# Parameters of the keypoint detector
+
+npoints: 500
+scale_factor: 1.2
+nlevels_pyramids: 8
+
+# Parameters feature tracker
+
+tracker_width: 21
+tracker_height: 21
+klt_max_err: 0.2
+nlevels_pyramids_klt: 3
+
+# Parameters feature matcher
+
+matcher_width: 21
+matcher_height: 21
+threshold_matching: 64
+
+
