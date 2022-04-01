@@ -9,9 +9,9 @@ nimages: 100
 
 # Parameters of the keypoint detector
 detector: "orb"
-threshold_fast: 50
+threshold_fast: 30
 
-npoints: 500
+npoints: 1000
 scale_factor: 1.2
 nlevels_pyramids: 8
 
