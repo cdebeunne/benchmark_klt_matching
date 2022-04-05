@@ -18,6 +18,7 @@ else(CMAKE_BUILD_TYPE STREQUAL "RELEASE")
 endif (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
 
 add_definitions(-D_USE_MATH_DEFINES)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 
 #-------------------------------------------------------------------
@@ -36,13 +37,16 @@ include_directories(
         ${YAML_CPP_INCLUDE_DIR}
 )
 
+## Declare a C++ library
+add_library (Frame Frame.cpp Frame.hpp)
+target_link_libraries(Frame ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES})
 
 #-------------------------------------------------------------------
 # Executables generation
 #-------------------------------------------------------------------
 
 add_executable(main main.cpp)
-target_link_libraries(main ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES})
+target_link_libraries(main ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES} Frame)
 
 add_executable(main_sequence main_sequence.cpp)
-target_link_libraries(main_sequence ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES})
+target_link_libraries(main_sequence ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES} Frame)

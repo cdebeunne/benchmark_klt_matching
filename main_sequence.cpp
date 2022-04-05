@@ -16,6 +16,7 @@
 #include "FeatureMatcher.hpp"
 #include "Multiview.hpp"
 #include "ImgLoader.hpp"
+#include "FeatureDetector.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -90,10 +91,11 @@ int main(int argc, char** argv){
         detector = cv::FastFeatureDetector::create(config.threshold_fast);
     }
     else if (config.detector == "orb"){
-        detector = cv::ORB::create(config.npoints,
-                                            config.scale_factor,
-                                            config.nlevels_pyramids,
-                                            31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+        int npoints_local = config.npoints / (config.nrows*config.ncols);
+        detector = cv::ORB::create(npoints_local,
+                                   config.scale_factor,
+                                   config.nlevels_pyramids,
+                                   31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
     }
     cv::Ptr<cv::FeatureDetector> descriptor = cv::ORB::create(config.npoints,
                                             config.scale_factor,
@@ -123,7 +125,7 @@ int main(int argc, char** argv){
         // Origin init
         if (counter == 0){
             img_origin = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-            detector->detect(img_origin, keypoints_origin);
+            parallelDetect(img_origin, keypoints_origin, detector, config.nrows, config.ncols);
             descriptor->compute(img_origin, keypoints_origin, descriptors_origin);
             img_last = img_origin;
             descriptors_last = descriptors_origin;
@@ -141,6 +143,16 @@ int main(int argc, char** argv){
             int ntracked_features = track(img_last, img_inc, keypoints_last, keypoints_inc,
                                     config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
+        
+
+            if (ntracked_features < config.threshold_tracks){
+                parallelDetect(img_last, keypoints_last, detector, config.nrows, config.ncols);
+                ntracked_features = track(img_last, img_inc, keypoints_last, keypoints_inc,
+                                    config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
+                                    config.klt_max_err);
+                keypoints_origin = keypoints_last;
+                origin_pairs_last = make_corespondence(keypoints_origin, keypoints_last);
+            }
 
             // Edit pairs
             last_pairs_inc = make_corespondence(keypoints_last, keypoints_inc);
@@ -150,6 +162,25 @@ int main(int argc, char** argv){
             cv::Mat cvMask;
             corespondences_to_keypoints(origin_pairs_inc, keypoints_origin, keypoints_inc);
             if(!computeEssential(K, keypoints_origin, keypoints_inc, cvMask))break;
+
+            if (config.debug){
+                std::cout << "Number of tracks" << std::endl;
+                std::cout << ntracked_features << std::endl;
+
+                // Image Display
+                cv::Mat img_matches;
+                std::vector<cv::DMatch> good_matches;
+                for (size_t i = 0; i < keypoints_inc.size(); i++){
+                    if (cvMask.at<bool>(i) == 1){
+                        cv::DMatch match(i,i,1);
+                        good_matches.push_back(match);
+                    }
+                }
+                cv::drawMatches(img_origin, keypoints_origin, img_inc, keypoints_inc, good_matches, img_matches, cv::Scalar::all(-1),
+                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+                cv::imshow( "Good Matches", img_matches);
+                cv::waitKey(0);
+            }
             
             // Incoming is now Last
             keypoints_last.clear();
@@ -163,35 +194,28 @@ int main(int argc, char** argv){
             results << counter << ","
                     << cv::countNonZero(cvMask) << ", \n";
 
-            if (config.debug){
-                std::cout << "Number of tracks" << std::endl;
-                std::cout << ntracked_features << std::endl;
-
-                // Image Display
-                cv::Mat img_matches;
-                std::vector<cv::DMatch> good_matches;
-                for (size_t i = 0; i < keypoints_inc.size(); i++){
-                    cv::DMatch match(i,i,1);
-                    good_matches.push_back(match);
-                }
-                cv::drawMatches(img_last, keypoints_last, img_inc, keypoints_inc, good_matches, img_matches, cv::Scalar::all(-1),
-                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-                cv::imshow( "Good Matches", img_matches);
-                cv::waitKey(0);
-            }
-
         }
 
         if (config.enable_matcher){
-            // Detection
-            detector->detect(img_inc, keypoints_inc);
-
-            // Description
-            descriptor->compute(img_inc, keypoints_inc, descriptors_inc);
+            // DetectionAndCompute & storage for repopulation
+            parallelDetectAndCompute(img_inc, keypoints_inc, descriptors_inc, detector, config.nrows, config.ncols);
+            std::vector<cv::KeyPoint> keypoints_inc_repop = keypoints_inc;
+            cv::Mat descriptors_inc_repop = descriptors_inc;
 
             int nmatched_features = match(keypoints_last, keypoints_inc, descriptors_last, descriptors_inc,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
-            
+        
+
+            if (nmatched_features < config.threshold_tracks){
+                parallelDetectAndCompute(img_last, keypoints_last, descriptors_last, detector, config.nrows, config.ncols);
+                nmatched_features = match(keypoints_last, keypoints_inc_repop, descriptors_last, descriptors_inc_repop,
+                                        config.matcher_width, config.matcher_height, config.threshold_matching);
+                keypoints_inc = keypoints_inc_repop;
+                descriptors_inc = descriptors_inc_repop;
+                keypoints_origin = keypoints_last;
+                origin_pairs_last = make_corespondence(keypoints_origin, keypoints_last);
+            }
+
             // Edit pairs
             last_pairs_inc = make_corespondence(keypoints_last, keypoints_inc);
             origin_pairs_inc = edit_corespondences(origin_pairs_last, last_pairs_inc);
@@ -200,6 +224,25 @@ int main(int argc, char** argv){
             cv::Mat cvMask;
             corespondences_to_keypoints(origin_pairs_inc, keypoints_origin, keypoints_inc);
             if(!computeEssential(K, keypoints_origin, keypoints_inc, cvMask))break;
+
+            if (config.debug){
+                std::cout << "Number of matches" << std::endl;
+                std::cout << nmatched_features << std::endl;
+
+                // Image Display
+                cv::Mat img_matches;
+                std::vector<cv::DMatch> good_matches;
+                for (size_t i = 0; i < keypoints_inc.size(); i++){
+                    if (cvMask.at<bool>(i) == 1){
+                        cv::DMatch match(i,i,1);
+                        good_matches.push_back(match);
+                    }
+                }
+                cv::drawMatches(img_origin, keypoints_origin, img_inc, keypoints_inc, good_matches, img_matches, cv::Scalar::all(-1),
+                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+                cv::imshow( "Good Matches", img_matches);
+                cv::waitKey(0);
+            }
 
             // Incoming is now Last
             keypoints_last.clear();
@@ -214,26 +257,9 @@ int main(int argc, char** argv){
 
             results << counter << ","
                     << cv::countNonZero(cvMask) << ", \n";
-
-            if (config.debug){
-                std::cout << "Number of matches" << std::endl;
-                std::cout << nmatched_features << std::endl;
-
-                // Image Display
-                cv::Mat img_matches;
-                std::vector<cv::DMatch> good_matches;
-                for (size_t i = 0; i < keypoints_inc.size(); i++){
-                    cv::DMatch match(i,i,1);
-                    good_matches.push_back(match);
-                }
-                cv::drawMatches(img_last, keypoints_last, img_inc, keypoints_inc, good_matches, img_matches, cv::Scalar::all(-1),
-                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-                cv::imshow( "Good Matches", img_matches);
-                cv::waitKey(0);
-            }
         }
 
-        // Set inc as lastious (only for image this time)
+        // Set inc as last (only for image this time)
         img_last = img_inc;
         counter++;
     }

@@ -8,6 +8,8 @@ struct Config {
     std::string dataset_path;
 
     std::string detector;
+    int nrows;
+    int ncols;
     int threshold_fast;
     int npoints;
     float scale_factor;
@@ -26,6 +28,7 @@ struct Config {
     bool enable_tracker;
     bool enable_matcher;
     int nimages;
+    int threshold_tracks;
 };
 
 Config readParameterFile(const std::string path){
@@ -38,8 +41,11 @@ Config readParameterFile(const std::string path){
     config.enable_matcher = yaml_file["enable_matcher"].as<bool>();
     config.enable_tracker = yaml_file["enable_tracker"].as<bool>();
     config.nimages = yaml_file["nimages"].as<int>();
+    config.threshold_tracks = yaml_file["threshold_tracks"].as<int>();
 
     // Config detector
+    config.nrows = yaml_file["nrows"].as<int>();
+    config.ncols = yaml_file["ncols"].as<int>();
     config.detector = yaml_file["detector"].as<std::string>();
     config.threshold_fast = yaml_file["threshold_fast"].as<int>();
     config.npoints = yaml_file["npoints"].as<int>();

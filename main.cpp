@@ -16,6 +16,7 @@
 #include "FeatureMatcher.hpp"
 #include "Multiview.hpp"
 #include "ImgLoader.hpp"
+#include "FeatureDetector.hpp"
 
 #include <iostream>
 #include <cstdlib>
@@ -48,10 +49,11 @@ int main(int argc, char** argv){
         detector = cv::FastFeatureDetector::create(config.threshold_fast);
     }
     else if (config.detector == "orb"){
-        detector = cv::ORB::create(config.npoints,
-                                            config.scale_factor,
-                                            config.nlevels_pyramids,
-                                            31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+        int npoints_local = config.npoints / (config.nrows*config.ncols);
+        detector = cv::ORB::create(npoints_local,
+                                   config.scale_factor,
+                                   config.nlevels_pyramids,
+                                   31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
     }
     cv::Ptr<cv::FeatureDetector> descriptor = cv::ORB::create(config.npoints,
                                             config.scale_factor,
@@ -80,7 +82,7 @@ int main(int argc, char** argv){
 
         if (counter == 0){
             img_last = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-            detector->detect(img_last, keypoints_last);
+            parallelDetect(img_last, keypoints_last, detector, config.nrows, config.ncols);
             descriptor->compute(img_last, keypoints_last, descriptors_last);
             counter ++;
             continue;
@@ -89,7 +91,8 @@ int main(int argc, char** argv){
 
         // Detection
         timer.start();
-        detector->detect(img_inc, keypoints_inc);
+        keypoints_inc.clear();
+        parallelDetect(img_inc, keypoints_inc, detector, config.nrows, config.ncols); 
         timer.stop();
         dt_detect += timer.elapsedSeconds();
         
@@ -122,6 +125,7 @@ int main(int argc, char** argv){
                 }
                 cv::drawMatches(img_last, keypoints_last_flow, img_inc, keypoints_inc_flow, good_matches, img_tracks, cv::Scalar::all(-1),
                         cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+                cv::drawKeypoints(img_last, keypoints_last_flow, img_tracks, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
                 cv::imshow( "Good Matches", img_tracks );
                 cv::waitKey(0);
             }
@@ -169,7 +173,8 @@ int main(int argc, char** argv){
 
         // Redetect to make frame to frame correspondence
         img_last = img_inc;
-        detector->detect(img_last, keypoints_last);
+        keypoints_last.clear();
+        parallelDetect(img_last, keypoints_last, detector, config.ncols, config.nrows);
         descriptor->compute(img_last, keypoints_last, descriptors_last);
         counter++;
     }

@@ -73,4 +73,36 @@ int match(std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_cu
     return number_of_matches;
 }
 
+int match_bruteforce(std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_curr, 
+        cv::Mat &descriptors_prev, cv::Mat &descriptors_curr,
+        int search_width, int search_height, float threshold){
+
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE_HAMMING);
+    std::vector< std::vector<cv::DMatch> > knn_matches;
+    matcher->knnMatch( descriptors_prev, descriptors_curr, knn_matches, 2 );
+    //-- Filter matches using the Lowe's ratio test
+    const float ratio_thresh = 0.5f;
+    int number_of_matches = 0;
+    
+    std::vector<cv::KeyPoint> kps_prev_new, kps_curr_new;
+    cv::Mat descriptors_curr_new, descriptors_prev_new;
+    for (size_t i = 0; i < knn_matches.size(); i++)
+    {
+        if (knn_matches[i][0].distance < ratio_thresh * knn_matches[i][1].distance)
+        {
+            kps_prev_new.push_back(kps_prev[knn_matches[i][0].queryIdx]);
+            kps_curr_new.push_back(kps_curr[knn_matches[i][0].trainIdx]);
+            descriptors_prev_new.push_back(descriptors_prev.row(knn_matches[i][0].queryIdx));
+            descriptors_curr_new.push_back(descriptors_curr.row(knn_matches[i][0].trainIdx));
+            number_of_matches++;
+        }
+    }
+
+    kps_prev = kps_prev_new;
+    kps_curr = kps_curr_new;
+    descriptors_prev = descriptors_prev_new;
+    descriptors_curr = descriptors_curr_new;
+    return number_of_matches;
+}
+
 #endif
