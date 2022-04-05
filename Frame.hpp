@@ -23,6 +23,7 @@ class Frame
         std::vector<cv::KeyPoint> getCvKeyPointsVector() const;
         std::vector<cv::Point2f> getP2fVector() const;
         std::vector<size_t> getKeyPointIndices() const;
+        std::unordered_map<size_t, KeyPoint> getMap() const {return _mapkps;};
         KeyPoint getKeyPointIdx(size_t idx) const;
         cv::Mat getCvImage() const;
         cv::Mat getDescriptors() const;

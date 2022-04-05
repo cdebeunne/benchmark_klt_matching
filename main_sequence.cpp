@@ -37,6 +37,14 @@ std::map<int, int> merge_map(std::map<int, int> prev_map_curr, std::map<int, int
     return prev_map_next;
 }
 
+std::map<int,int> map_itself(Frame f){
+    std::map<int, int> map;
+    for (auto & match : f.getMap()){
+        map[match.first] = match.first;
+    }
+    return map;
+}
+
 
 int main(int argc, char** argv){
 
@@ -91,8 +99,7 @@ int main(int argc, char** argv){
             frame_origin.setImg(img_origin);
             parallelDetectAndCompute(frame_origin, detector, config.nrows, config.ncols);
             frame_last = frame_origin;
-            match(frame_origin, frame_last, origin_map_last,
-                  config.matcher_width, config.matcher_height, config.threshold_matching);
+            origin_map_last = map_itself(frame_origin);
 
             results << 0 << "," << origin_map_last.size() << ",\n";
             counter ++;
@@ -108,35 +115,37 @@ int main(int argc, char** argv){
             int ntracked_features = track(frame_last, frame_inc, last_map_inc,
                                     config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
-        
+
 
             if (ntracked_features < config.threshold_tracks){
-                break;
-                // parallelDetect(img_last, keypoints_last, detector, config.nrows, config.ncols);
-                // ntracked_features = track(img_last, img_inc, keypoints_last, keypoints_inc,
-                //                     config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
-                //                     config.klt_max_err);
-                // keypoints_origin = keypoints_last;
-                // origin_pairs_last = make_corespondence(keypoints_origin, keypoints_last);
+                // Suboptimal: some kps are tracked twice
+                last_map_inc.clear();
+                frame_inc.reset();
+                parallelDetect(frame_last, detector, config.nrows, config.ncols);
+                ntracked_features = track(frame_last, frame_inc, last_map_inc,
+                                    config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
+                                    config.klt_max_err);
+                frame_origin = frame_last;
+                origin_map_last = map_itself(frame_origin);
             }
 
             // Filtering with Essential Matrix
             cv::Mat cvMask;
             origin_map_inc = merge_map(origin_map_last, last_map_inc);
             std::vector<cv::Point2f> p2f_origin_track, p2f_inc_track;
+            std::vector<int> all_the_ids;
             for (auto & match: origin_map_inc){
                 p2f_origin_track.push_back(frame_origin.getKeyPointIdx(match.first)._cvKeyPoint.pt);
                 p2f_inc_track.push_back(frame_inc.getKeyPointIdx(match.second)._cvKeyPoint.pt);
+                all_the_ids.push_back(match.first);
             }
             if(!computeEssential(K, p2f_origin_track, p2f_inc_track, cvMask))break;
             
             // Removing the matches that are outliers 
-            int k = 0;
-            for (auto & match : origin_map_inc){
+            for (size_t k = 0; k<all_the_ids.size(); k++){
                 if (cvMask.at<bool>(k) == 0){
-                    origin_map_inc.erase(match.first);
+                    origin_map_inc.erase(all_the_ids[k]);
                 }
-                k++;
             }
 
             // Incoming is now last
@@ -163,19 +172,19 @@ int main(int argc, char** argv){
             cv::Mat cvMask;
             origin_map_inc = merge_map(origin_map_last, last_map_inc);
             std::vector<cv::Point2f> p2f_origin_match, p2f_inc_match;
+            std::vector<int> all_the_ids;
             for (auto & match: origin_map_inc){
                 p2f_origin_match.push_back(frame_origin.getKeyPointIdx(match.first)._cvKeyPoint.pt);
                 p2f_inc_match.push_back(frame_inc.getKeyPointIdx(match.second)._cvKeyPoint.pt);
+                all_the_ids.push_back(match.first);
             }
             if(!computeEssential(K, p2f_origin_match, p2f_inc_match, cvMask))break;
-            
-            // Removing the matches that are outliers
-            int k = 0;
-            for (auto & match : origin_map_inc){
+
+            // Removing the matches that are outliers 
+            for (size_t k = 0; k<all_the_ids.size(); k++){
                 if (cvMask.at<bool>(k) == 0){
-                    origin_map_inc.erase(match.first);
+                    origin_map_inc.erase(all_the_ids[k]);
                 }
-                k++;
             }
 
             // Incoming is now Last

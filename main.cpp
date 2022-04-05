@@ -88,10 +88,10 @@ int main(int argc, char** argv){
             continue;
         }
         img_inc = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-        frame_inc.reset();
-        frame_inc.setImg(img_inc);
 
         if (config.enable_tracker){
+            frame_inc.reset();
+            frame_inc.setImg(img_inc);
             timer.start();
             std::map<int, int> last_map_inc;
             int ntracked_features = track(frame_last, frame_inc, last_map_inc,
@@ -130,6 +130,8 @@ int main(int argc, char** argv){
         }
 
         if (config.enable_matcher){
+            frame_inc.reset();
+            frame_inc.setImg(img_inc);
             // detect features for Incoming
             parallelDetectAndCompute(frame_inc, detector, config.nrows, config.ncols);
             

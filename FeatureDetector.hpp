@@ -52,7 +52,7 @@ void parallelDetect(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int rows, i
         std::vector<cv::KeyPoint> keypoints_local;
         cv::Mat descriptors_local;
 
-        // call OpenCV detectAndCompute function
+        // call OpenCV detect function
         detector->detect(I, keypoints_local);
 
 
