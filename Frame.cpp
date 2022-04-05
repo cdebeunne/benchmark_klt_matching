@@ -1,6 +1,14 @@
 #include "Frame.hpp"
 
-std::vector<cv::KeyPoint> Frame::getKeyPointsVector() const{
+std::vector<KeyPoint> Frame::getKeyPointsVector() const{
+    std::vector<KeyPoint> kps;
+    for( const auto &kp : _mapkps) {
+        kps.push_back(kp.second);
+    }
+    return kps;
+}
+
+std::vector<cv::KeyPoint> Frame::getCvKeyPointsVector() const{
     std::vector<cv::KeyPoint> cv_kps;
     for( const auto &kp : _mapkps) {
         cv_kps.push_back(kp.second._cvKeyPoint);
@@ -24,6 +32,18 @@ std::vector<cv::Point2f> Frame::getP2fVector() const{
     return p2fs;
 }
 
+std::vector<size_t> Frame::getKeyPointIndices() const{
+    std::vector<size_t> kpindices;
+    for( const auto &kp : _mapkps) {
+        kpindices.push_back(kp.first);
+    }
+    return kpindices;
+}
+
+KeyPoint Frame::getKeyPointIdx(size_t idx) const{
+    return _mapkps.at(idx);
+}
+
 cv::Mat Frame::getCvImage() const{
     return _cvimg;
 }
@@ -34,10 +54,41 @@ void Frame::addKeyPoint(KeyPoint kp){
         std::cout << "Warning, replacing a feature with the same ID" << std::endl;
     }
     _mapkps.emplace(kp._id, kp);
+    _maxidx++;
 
 }
 
+void Frame::addKeyPoint(cv::KeyPoint cvkp){
+    KeyPoint kp;
+    kp._id = _maxidx;
+    kp._cvKeyPoint = cvkp;
+    _mapkps.emplace(kp._id, kp);
+    _maxidx++;
+}
+
+void Frame::addKeyPoint(cv::KeyPoint cvkp, cv::Mat desc){
+    KeyPoint kp;
+    kp._id = _maxidx;
+    kp._desc = desc;
+    kp._cvKeyPoint = cvkp;
+    _mapkps.emplace(kp._id, kp);
+    _maxidx++;
+}
+
+
 void Frame::removeKeyPoint(KeyPoint kp){
     _mapkps.erase(kp._id);
+}
+
+void Frame::removeKeyPointIdx(size_t idx){
+    _mapkps.erase(idx);
+}
+
+void Frame::setImg(cv::Mat img){
+    _cvimg = img;
+}
+
+void Frame::reset(){
+    _mapkps.clear();
 }
 

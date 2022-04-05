@@ -7,6 +7,8 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
+#include <Frame.hpp>
+
 #include <iostream>
 #include <vector>
 
@@ -21,6 +23,21 @@ std::vector<int> getKeypointsInBox(int search_width, int search_height, cv::KeyP
             || (keypoint.pt.y < y - search_height/2) || (keypoint.pt.y > y + search_height/2))
             continue;
         indices_in_box.push_back(i);
+    }
+
+    return indices_in_box;
+}
+
+std::vector<int> getKeypointsInBox(int search_width, int search_height, KeyPoint kp, Frame f){
+    int x = kp._cvKeyPoint.pt.x;
+    int y = kp._cvKeyPoint.pt.y;
+    std::vector<int> indices_in_box;
+
+    for (auto &keypoint : f.getKeyPointsVector()){
+        if((keypoint._cvKeyPoint.pt.x < x - search_width/2) || (keypoint._cvKeyPoint.pt.x > x + search_width/2) 
+            || (keypoint._cvKeyPoint.pt.y < y - search_height/2) || (keypoint._cvKeyPoint.pt.y > y + search_height/2))
+            continue;
+        indices_in_box.push_back(keypoint._id);
     }
 
     return indices_in_box;
@@ -70,6 +87,41 @@ int match(std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_cu
     kps_curr = kps_curr_new;
     descriptors_prev = desc_prev_new;
     descriptors_curr = desc_curr_new;
+    return number_of_matches;
+}
+
+int match(Frame f_prev, Frame f_curr, std::map<int, int> &prev_map_curr,
+        int search_width, int search_height, float threshold){
+
+    std::vector<int> indices_in_box;
+    int number_of_matches = 0;
+
+    for (auto & kp_prev: f_prev.getKeyPointsVector()){
+        cv::Mat descriptor_prev = kp_prev._desc;
+
+        indices_in_box = getKeypointsInBox(search_width, search_height, kp_prev, f_curr);
+
+        // Case no feature in the surroundings
+        if (indices_in_box.size() == 0) continue;
+
+        // Here we take the best score, we can also do multi match
+        int best_idx = 0;
+        float best_score = threshold;
+        for (auto & index : indices_in_box){
+            cv::Mat descriptor_curr = f_curr.getKeyPointIdx(index)._desc;
+            float score = cv::norm(descriptor_prev, descriptor_curr, cv::NORM_HAMMING2);
+
+            if (score < best_score){
+                best_score = score;
+                best_idx = index;
+            }
+        }
+
+        if (best_score < threshold){
+            prev_map_curr[kp_prev._id] = best_idx;
+            number_of_matches++;
+        }
+    }
     return number_of_matches;
 }
 

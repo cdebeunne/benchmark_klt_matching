@@ -5,12 +5,12 @@ dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
 debug: False
 enable_tracker: False
 enable_matcher: True
-nimages: 200
+nimages: 100
 threshold_tracks: 0
 
 # Parameters of the keypoint detector
-nrows: 4
-ncols: 4
+nrows: 1
+ncols: 1
 
 detector: "orb"
 threshold_fast: 30

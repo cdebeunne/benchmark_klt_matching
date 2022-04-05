@@ -17,6 +17,7 @@
 #include "Multiview.hpp"
 #include "ImgLoader.hpp"
 #include "FeatureDetector.hpp"
+#include <Frame.hpp>
 
 #include <iostream>
 #include <cstdlib>
@@ -42,6 +43,7 @@ int main(int argc, char** argv){
     // path and loader of the EUROC sequence
     std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);
     cv::Mat img_inc, img_last;
+    Frame frame_last, frame_inc;
 
     // Initialize the detector
     cv::Ptr<cv::FeatureDetector> detector;
@@ -59,8 +61,6 @@ int main(int argc, char** argv){
                                             config.scale_factor,
                                             config.nlevels_pyramids,
                                             31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
-    std::vector<cv::KeyPoint> keypoints_inc, keypoints_last;
-    cv::Mat descriptors_inc, descriptors_last;
 
     // Initialize pertinent data
     float avg_track = 0;
@@ -82,26 +82,19 @@ int main(int argc, char** argv){
 
         if (counter == 0){
             img_last = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-            parallelDetect(img_last, keypoints_last, detector, config.nrows, config.ncols);
-            descriptor->compute(img_last, keypoints_last, descriptors_last);
+            frame_last.setImg(img_last);
+            parallelDetectAndCompute(frame_last, detector, config.nrows, config.ncols);
             counter ++;
             continue;
         }
         img_inc = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
-
-        // Detection
-        timer.start();
-        keypoints_inc.clear();
-        parallelDetect(img_inc, keypoints_inc, detector, config.nrows, config.ncols); 
-        timer.stop();
-        dt_detect += timer.elapsedSeconds();
-        
+        frame_inc.reset();
+        frame_inc.setImg(img_inc);
 
         if (config.enable_tracker){
             timer.start();
-            std::vector<cv::KeyPoint> keypoints_inc_flow;
-            std::vector<cv::KeyPoint> keypoints_last_flow = keypoints_last;
-            int ntracked_features = track(img_last, img_inc, keypoints_last_flow, keypoints_inc_flow,
+            std::map<int, int> last_map_inc;
+            int ntracked_features = track(frame_last, frame_inc, last_map_inc,
                                     config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
             timer.stop();
@@ -110,38 +103,39 @@ int main(int argc, char** argv){
 
             // Check inliers with essential
             cv::Mat cvMask;
-            computeEssential(K, keypoints_last_flow, keypoints_inc_flow, cvMask);
-            inliers_track += 100 * cv::countNonZero(cvMask)/keypoints_inc_flow.size();
+            std::vector<cv::Point2f> p2f_last_track, p2f_inc_track;
+            for (auto & match: last_map_inc){
+                p2f_last_track.push_back(frame_last.getKeyPointIdx(match.first)._cvKeyPoint.pt);
+                p2f_inc_track.push_back(frame_inc.getKeyPointIdx(match.second)._cvKeyPoint.pt);
+            }
+            computeEssential(K, p2f_last_track, p2f_inc_track, cvMask);
+            inliers_track += 100 * cv::countNonZero(cvMask)/p2f_last_track.size();
 
             if (config.debug){
                 std::cout << "Number of tracks" << std::endl;
                 std::cout << ntracked_features << std::endl;
 
                 // Image display for debug
-                cv::Mat img_tracks;
-                for (size_t i = 0; i < keypoints_inc_flow.size(); i++){
-                    cv::DMatch match(i,i,1);
-                    good_matches.push_back(match);
+                cv::Mat img_matches;
+                for (auto & match: last_map_inc){
+                    cv::DMatch dmatch(match.first,match.second,1);
+                    good_matches.push_back(dmatch);
                 }
-                cv::drawMatches(img_last, keypoints_last_flow, img_inc, keypoints_inc_flow, good_matches, img_tracks, cv::Scalar::all(-1),
+                cv::drawMatches(img_last, frame_last.getCvKeyPointsVector(), img_inc, frame_inc.getCvKeyPointsVector(), 
+                        good_matches, img_matches, cv::Scalar::all(-1),
                         cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-                cv::drawKeypoints(img_last, keypoints_last_flow, img_tracks, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
-                cv::imshow( "Good Matches", img_tracks );
+                cv::imshow( "Good Matches", img_matches);
                 cv::waitKey(0);
             }
         }
 
         if (config.enable_matcher){
-
-            // Compute descriptors and matching 
+            // detect features for Incoming
+            parallelDetectAndCompute(frame_inc, detector, config.nrows, config.ncols);
+            
             timer.start();
-            descriptor->compute(img_inc, keypoints_inc, descriptors_inc);
-            std::vector<cv::KeyPoint> keypoints_last_match = keypoints_last;
-            cv::Mat descriptors_last_match = descriptors_last;
-            std::vector<cv::KeyPoint> keypoints_inc_match = keypoints_inc; 
-            cv::Mat descriptors_inc_match = descriptors_inc;
-
-            int nmatched_features = match(keypoints_last_match, keypoints_inc_match, descriptors_last_match, descriptors_inc_match,
+            std::map<int, int> last_map_inc;
+            int nmatched_features = match(frame_last, frame_inc, last_map_inc,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
             timer.stop();
             dt_match += timer.elapsedSeconds();
@@ -149,8 +143,13 @@ int main(int argc, char** argv){
 
             // Check inliers with essential
             cv::Mat cvMask;
-            computeEssential(K, keypoints_last_match, keypoints_inc_match, cvMask);
-            inliers_match += 100 * cv::countNonZero(cvMask)/keypoints_inc_match.size();
+            std::vector<cv::Point2f> p2f_last_match, p2f_inc_match;
+            for (auto & match: last_map_inc){
+                p2f_last_match.push_back(frame_last.getKeyPointIdx(match.first)._cvKeyPoint.pt);
+                p2f_inc_match.push_back(frame_inc.getKeyPointIdx(match.second)._cvKeyPoint.pt);
+            }
+            computeEssential(K, p2f_last_match, p2f_inc_match, cvMask);
+            inliers_match += 100 * cv::countNonZero(cvMask)/p2f_last_match.size();
 
 
             if (config.debug){
@@ -160,11 +159,12 @@ int main(int argc, char** argv){
                 // Image Display
                 cv::Mat img_matches;
                 good_matches.clear();
-                for (size_t i = 0; i < keypoints_inc_match.size(); i++){
-                    cv::DMatch match(i,i,1);
-                    good_matches.push_back(match);
+                for (auto & match: last_map_inc){
+                    cv::DMatch dmatch(match.first,match.second,1);
+                    good_matches.push_back(dmatch);
                 }
-                cv::drawMatches(img_last, keypoints_last_match, img_inc, keypoints_inc_match, good_matches, img_matches, cv::Scalar::all(-1),
+                cv::drawMatches(img_last, frame_last.getCvKeyPointsVector(), img_inc, frame_inc.getCvKeyPointsVector(), 
+                        good_matches, img_matches, cv::Scalar::all(-1),
                         cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
                 cv::imshow( "Good Matches", img_matches);
                 cv::waitKey(0);
@@ -173,9 +173,12 @@ int main(int argc, char** argv){
 
         // Redetect to make frame to frame correspondence
         img_last = img_inc;
-        keypoints_last.clear();
-        parallelDetect(img_last, keypoints_last, detector, config.ncols, config.nrows);
-        descriptor->compute(img_last, keypoints_last, descriptors_last);
+        frame_last.reset();
+        frame_last.setImg(img_last);
+        timer.start();
+        parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
+        timer.stop();
+        dt_detect += timer.elapsedSeconds();
         counter++;
     }
 
