@@ -26,6 +26,8 @@ with open('params.yaml', 'r') as f:
 
 
 # TRACKING
+# params['detector'] = 'fast'  # not working right now
+params['detector'] = 'orb'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
 # save a modified parameter file to produce tracking results
@@ -37,6 +39,7 @@ print('tracking done')
 
 
 # MATCHING
+params['detector'] = 'orb'
 params['enable_tracker'] = False
 params['enable_matcher'] = not params['enable_tracker']
 # save a modified parameter file to produce matching results

@@ -66,7 +66,8 @@ int main(int argc, char** argv){
     // Initialize the detector
     cv::Ptr<cv::FeatureDetector> detector;
     if (config.detector == "fast"){
-        detector = cv::FastFeatureDetector::create(config.threshold_fast);
+        bool non_maximum_supression = true;
+        detector = cv::FastFeatureDetector::create(config.threshold_fast, non_maximum_supression);
     }
     else if (config.detector == "orb"){
         int npoints_local = config.npoints / (config.nrows*config.ncols);
