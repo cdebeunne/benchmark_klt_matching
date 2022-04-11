@@ -38,7 +38,10 @@ int main(int argc, char** argv){
          0, 0, 1;
 
     // Load config
-    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+"param.yaml");
+    std::string param_file = argv[1];
+    std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
+    // Load config
+    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
 
     // path and loader of the EUROC sequence
     std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);
@@ -63,13 +66,19 @@ int main(int argc, char** argv){
                                             31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
 
     // Initialize pertinent data
-    float avg_track = 0;
-    float avg_match = 0;
-    float dt_detect = 0;
-    float dt_match = 0;
-    float dt_track = 0;
-    float inliers_match = 0;
-    float inliers_track = 0;
+    double avg_track = 0;
+    double avg_match = 0;
+    double dt_detect = 0;
+    double dt_match = 0;
+    double dt_track = 0;
+    double inliers_match = 0;
+    double inliers_track = 0;
+
+    // // Stores results in .csv
+    // std::fstream results;
+    // std::string results_path = "results.csv";
+    // results.open(results_path, std::fstream::out);
+    // results << "iter,inlier,dt\n";
 
     int counter = 0;
     std::string img_path;

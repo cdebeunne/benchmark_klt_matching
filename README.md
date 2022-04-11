@@ -12,7 +12,7 @@ make
 ```
 
 2 executables:  
-- `./main`: evaluate performances on execution and tracking frame to frame
+- `./main params.yaml`: evaluate performances on execution and tracking frame to frame
 - `./main_sequence params.yaml`: evaluate the persistance of tracks from frame to frame. Results in a .csv. Parameters in `params.yaml`
 
 Scripts:
