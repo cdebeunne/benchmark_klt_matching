@@ -54,8 +54,10 @@ int main(int argc, char** argv){
          0, 457.296, 248.375,
          0, 0, 1;
 
+    std::string param_file = argv[1];
+    std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
     // Load config
-    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+"param.yaml");
+    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
 
     // path and loader of the EUROC sequence
     std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);
@@ -80,7 +82,7 @@ int main(int argc, char** argv){
     std::fstream results;
     std::string results_path = "results.csv";
     results.open(results_path, std::fstream::out);
-    results << "iter, nTracks, \n";
+    results << "iter,nTracks\n";
 
 
     // Here we detect once and try to see how many tracks and matches follow
@@ -101,7 +103,7 @@ int main(int argc, char** argv){
             frame_last = frame_origin;
             origin_map_last = map_itself(frame_origin);
 
-            results << 0 << "," << origin_map_last.size() << ",\n";
+            results << 0 << "," << origin_map_last.size() << "\n";
             counter ++;
             continue;
         }
@@ -152,7 +154,7 @@ int main(int argc, char** argv){
             origin_map_last = origin_map_inc;
 
             results << counter << ","
-                    << cv::countNonZero(cvMask) << ", \n";
+                    << cv::countNonZero(cvMask) << "\n";
 
         }
 
@@ -191,7 +193,7 @@ int main(int argc, char** argv){
             origin_map_last = origin_map_inc;
 
             results << counter << ","
-                    << cv::countNonZero(cvMask) << ", \n";
+                    << cv::countNonZero(cvMask) << "\n";
         }
 
         // Set inc as last (only for image this time)

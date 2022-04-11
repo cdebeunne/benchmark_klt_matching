@@ -2,10 +2,8 @@
 
 A C++ code to compare the performances of feature tracking with LKT and descriptor matching implemented on OpenCV. An Image Loader for the Euroc dataset is implemented.
 
-Compile and run:
+Building the project:
 ---
-
-Just type the following
 
 ```
 mkdir build && cd build
@@ -13,7 +11,12 @@ cmake ..
 make 
 ```
 
-And then you can either run `./main` to evaluate performances on execution and tracking frame to frame, or `./main_sequence` to see tracking keyframe to frame (the results are reported in a .csv). You can edit the param.yaml file to put your own path and parameters.
+2 executables:  
+- `./main`: evaluate performances on execution and tracking frame to frame
+- `./main_sequence params.yaml`: evaluate the persistance of tracks from frame to frame. Results in a .csv. Parameters in `params.yaml`
+
+Scripts:
+- `tracking_experiments.py`: run tracking and matching on EuRoc dataset
 
 Warning:
 ---
