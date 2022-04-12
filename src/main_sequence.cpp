@@ -203,4 +203,6 @@ int main(int argc, char** argv){
     }
 
     results.close();
+
+    return 0;
 }
