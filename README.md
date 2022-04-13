@@ -17,6 +17,7 @@ make
 
 Scripts:
 - `tracking_experiments.py`: run tracking and matching on EuRoc dataset
+- `timings_experiments.py`: run tracking and plot timings of detection and tracking for each frame
 
 Warning:
 ---
