@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     std::fstream results;
     std::string results_path = "results.csv";
     results.open(results_path, std::fstream::out);
-    results << "iter,nTracks\n";
+    results << "nTracks\n";
 
 
     // Here we detect once and try to see how many tracks and matches follow
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
             frame_last = frame_origin;
             origin_map_last = map_itself(frame_origin);
 
-            results << 0 << "," << origin_map_last.size() << "\n";
+            results << origin_map_last.size() << "\n";
             counter ++;
             continue;
         }
@@ -158,8 +158,7 @@ int main(int argc, char** argv)
             // Incoming is now last
             origin_map_last = origin_map_inc;
 
-            results << counter << ","
-                    << cv::countNonZero(cvMask) << "\n";
+            results << cv::countNonZero(cvMask) << "\n";
 
         }
 
@@ -197,8 +196,7 @@ int main(int argc, char** argv)
             // Incoming is now Last
             origin_map_last = origin_map_inc;
 
-            results << counter << ","
-                    << cv::countNonZero(cvMask) << "\n";
+            results << cv::countNonZero(cvMask) << "\n";
         }
 
         // Set inc as last (only for image this time)

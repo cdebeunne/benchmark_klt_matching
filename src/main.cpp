@@ -83,20 +83,25 @@ int main(int argc, char** argv)
 
     cv::Ptr<cv::FeatureDetector> detector = factoryDetector(config);
 
-    // Initialize pertinent data
+    // Aggregated data pertinent data
     double avg_track = 0;
     double avg_match = 0;
-    double dt_detect = 0;
-    double dt_match = 0;
-    double dt_track = 0;
+    double dt_detect_tot = 0;
+    double dt_match_tot = 0;
+    double dt_track_tot = 0;
     double inliers_match = 0;
     double inliers_track = 0;
 
-    // Stores results in .csv
-    std::fstream results;
-    std::string results_path = "results.csv";
-    results.open(results_path, std::fstream::out);
-    results << "iter,inlier,dt\n";
+    // One iteration data
+    double dt_detect = 0;
+    double dt_track = 0;
+    double nb_to_tracks = 0;
+
+    // Stores tracking results in .csv
+    std::fstream results_tracking;
+    std::string results_path = "result_tracking_timings.csv";
+    results_tracking.open(results_path, std::fstream::out);
+    results_tracking << "dt_detect,dt_track,nb_to_tracks\n";
 
     int counter = 0;
     std::string img_path;
@@ -121,13 +126,16 @@ int main(int argc, char** argv)
         if (config.enable_tracker){
             frame_inc.reset();
             frame_inc.setImg(img_inc);
+            nb_to_tracks = frame_last.getMap().size();
             timer.start();
             std::map<int, int> last_map_inc;
             int ntracked_features = track(frame_last, frame_inc, last_map_inc,
                                     config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
             timer.stop();
-            dt_track += timer.elapsedSeconds();
+            dt_track = timer.elapsedSeconds();
+            dt_track_tot += dt_track;
+            
             avg_track += ntracked_features;
 
             // Check inliers with essential
@@ -144,6 +152,7 @@ int main(int argc, char** argv)
                 std::cout << "ntracked_features: " << ntracked_features << std::endl;
                 showMatches(frame_last, frame_inc, last_map_inc, config);
             }
+
         }
 
 
@@ -161,7 +170,7 @@ int main(int argc, char** argv)
             int nmatched_features = match(frame_last, frame_inc, last_map_inc,
                                         config.matcher_width, config.matcher_height, config.threshold_matching);
             timer.stop();
-            dt_match += timer.elapsedSeconds();
+            dt_match_tot += timer.elapsedSeconds();
             avg_match += nmatched_features;
 
             // Check inliers with essential
@@ -188,15 +197,23 @@ int main(int argc, char** argv)
         timer.start();
         parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
         timer.stop();
-        dt_detect += timer.elapsedSeconds();
+        dt_detect = timer.elapsedSeconds();
+        dt_detect_tot += dt_detect;
+
+
+        // store result in csv
+        results_tracking << dt_detect << ","
+                         << dt_track << ","
+                         << nb_to_tracks << "\n";
+
         counter++;
     }
 
     avg_match /= counter;
     avg_track /= counter;
-    dt_detect /= counter;
-    dt_match /= counter;
-    dt_track /= counter;
+    dt_detect_tot /= counter;
+    dt_match_tot /= counter;
+    dt_track_tot /= counter;
     inliers_match /= counter;
     inliers_track /= counter;
 
@@ -210,11 +227,14 @@ int main(int argc, char** argv)
     std::cout << "Inliers ratio matching" << std::endl;
     std::cout << inliers_match << std::endl;
     std::cout << "Time to detect" << std::endl;
-    std::cout << dt_detect << std::endl;
+    std::cout << dt_detect_tot << std::endl;
     std::cout << "Time to track" << std::endl;
-    std::cout << dt_track << std::endl;
+    std::cout << dt_track_tot << std::endl;
     std::cout << "Time to match" << std::endl;
-    std::cout << dt_match << std::endl;
+    std::cout << dt_match_tot << std::endl;
+
+
+    results_tracking.close();
 
 
     return 0;
