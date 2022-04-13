@@ -7,7 +7,7 @@ dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 debug: False
 enable_tracker: True
 enable_matcher: False
-nimages: 100
+max_nb_frames: 1000
 threshold_tracks: 400
 
 # Parameters of the keypoint detector

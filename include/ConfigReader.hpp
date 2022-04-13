@@ -27,7 +27,7 @@ struct Config {
     bool debug;
     bool enable_tracker;
     bool enable_matcher;
-    int nimages;
+    int max_nb_frames;
     int threshold_tracks;
 };
 
@@ -40,7 +40,7 @@ Config readParameterFile(const std::string path){
     config.debug = yaml_file["debug"].as<bool>();
     config.enable_matcher = yaml_file["enable_matcher"].as<bool>();
     config.enable_tracker = yaml_file["enable_tracker"].as<bool>();
-    config.nimages = yaml_file["nimages"].as<int>();
+    config.max_nb_frames = yaml_file["max_nb_frames"].as<int>();
     config.threshold_tracks = yaml_file["threshold_tracks"].as<int>();
 
     // Config detector

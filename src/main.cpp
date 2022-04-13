@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     std::string img_path;
     for (const auto & img_name : img_list){
         img_path = config.dataset_path + "/data/" + img_name;
-        if (counter > config.nimages) break;
+        if (counter > config.max_nb_frames) break;
 
 
         if (counter == 0){
