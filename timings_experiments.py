@@ -31,7 +31,7 @@ with open('params.yaml', 'r') as f:
 params['detector'] = 'orb'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
-# save a modified parameter file to produce tracking results
+
 with open(PARAMS_MOD, 'w') as f:
     yaml.dump(params, f)
 
@@ -45,15 +45,15 @@ plt.figure()
 plt.title('dt track = f(nb_to_tracks)')
 plt.plot(nb_to_tracks_arr, dt_track_arr, '.')
 plt.xlabel('# of Keypoints to track')
-plt.xlabel('tracking time (ms)')
+plt.ylabel('tracking time (s)')
 plt.grid()
 
 plt.figure()
-plt.title('dt detect and dt track = f(t)')
-plt.plot(iters_tracking, dt_detect_arr, label='detect')
-plt.plot(iters_tracking, dt_track_arr, label='track')
+plt.title('dt detect and dt track = f(frame #)')
+plt.plot(iters_tracking, dt_detect_arr, '.', label='detect')
+plt.plot(iters_tracking, dt_track_arr,  '.', label='track')
 plt.xlabel('Frame #')
-plt.ylabel('time (ms)')
+plt.ylabel('time (s)')
 plt.legend()
 plt.grid()
 

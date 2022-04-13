@@ -107,20 +107,16 @@ int main(int argc, char** argv)
     std::string img_path;
     for (const auto & img_name : img_list){
         img_path = config.dataset_path + "/data/" + img_name;
-        if (counter > config.nimages) break;
+        if (counter > config.max_nb_frames) break;
 
 
         if (counter == 0){
             img_last = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             frame_last.setImg(img_last);
             if (config.enable_matcher){
-                timer.start();
                 parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
-                timer.stop();
             } else{
-                timer.start();
                 parallelDetect(frame_last, detector, config.ncols, config.nrows);
-                timer.stop();
             }
             counter ++;
             continue;
@@ -203,15 +199,13 @@ int main(int argc, char** argv)
         frame_last.reset();
         frame_last.setImg(img_last);
 
+        timer.start();
         if (config.enable_matcher){
-            timer.start();
             parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
-            timer.stop();
         } else{
-            timer.start();
             parallelDetect(frame_last, detector, config.ncols, config.nrows);
-            timer.stop();
         }
+        timer.stop();
         
 
         dt_detect = timer.elapsedSeconds();

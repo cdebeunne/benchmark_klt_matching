@@ -1,20 +1,23 @@
 # Parameter file for benchmarking
-dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
-# dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
+# dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
+dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 
 
-# choose execution mode
+# choose execution mode (either tracking or matching)
 debug: False
-enable_tracker: False
-enable_matcher: True
-nimages: 100
+enable_tracker: True
+enable_matcher: False
+max_nb_frames: 1000
 threshold_tracks: 400
 
 # Parameters of the keypoint detector
 nrows: 1
 ncols: 1
 
-detector: "orb"
+# 2 detectors possible: "orb" and "fast"
+# - orb works both for tracking and matching
+# - fast works for tracking and but matching will throw an error since cv::detectAndCompute is not implemented
+detector: "fast"
 threshold_fast: 30
 
 npoints: 1000

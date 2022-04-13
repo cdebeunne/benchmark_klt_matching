@@ -98,13 +98,17 @@ int main(int argc, char** argv)
 
     for (const auto & img_name : img_list){
         img_path = config.dataset_path + "/data/" + img_name;
-        if (counter > config.nimages) break;
+        if (counter > config.max_nb_frames) break;
 
         // Origin init
         if (counter == 0){
             img_origin = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             frame_origin.setImg(img_origin);
-            parallelDetectAndCompute(frame_origin, detector, config.nrows, config.ncols);
+            if (config.enable_matcher){
+                parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
+            } else{
+                parallelDetect(frame_last, detector, config.ncols, config.nrows);
+            }            
             frame_last = frame_origin;
             origin_map_last = map_itself(frame_origin);
 
