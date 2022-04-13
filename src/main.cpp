@@ -35,6 +35,24 @@ tracking, matching.
 
 
 
+void showMatches(const Frame& frame_last, const Frame& frame_inc, const std::map<int,int>& last_map_inc, const Config& config)
+{
+    // Image display for debug
+    std::vector<cv::DMatch> good_matches;
+    cv::Mat img_matches;
+    for (auto & match: last_map_inc){
+        cv::DMatch dmatch(match.first,match.second,1);
+        good_matches.push_back(dmatch);
+    }
+    cv::drawMatches(frame_last.getImg(), frame_last.getCvKeyPointsVector(), frame_inc.getImg(), frame_inc.getCvKeyPointsVector(), 
+            good_matches, img_matches, cv::Scalar::all(-1),
+            cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+    cv::imshow( "Good Matches", img_matches);
+    cv::waitKey(0);
+}
+
+
+
 int main(int argc, char** argv)
 {
 
@@ -86,8 +104,6 @@ int main(int argc, char** argv)
         img_path = config.dataset_path + "/data/" + img_name;
         if (counter > config.nimages) break;
 
-        // Matches variable for vizu
-        std::vector<cv::DMatch> good_matches;
 
         if (counter == 0){
             img_last = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
@@ -98,6 +114,10 @@ int main(int argc, char** argv)
         }
         img_inc = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
 
+
+        ////////////////////////
+        // KLT TRACKING OPTION
+        ////////////////////////
         if (config.enable_tracker){
             frame_inc.reset();
             frame_inc.setImg(img_inc);
@@ -121,23 +141,15 @@ int main(int argc, char** argv)
             inliers_track += 100 * cv::countNonZero(cvMask)/p2f_last_track.size();
 
             if (config.debug){
-                std::cout << "Number of tracks" << std::endl;
-                std::cout << ntracked_features << std::endl;
-
-                // Image display for debug
-                cv::Mat img_matches;
-                for (auto & match: last_map_inc){
-                    cv::DMatch dmatch(match.first,match.second,1);
-                    good_matches.push_back(dmatch);
-                }
-                cv::drawMatches(img_last, frame_last.getCvKeyPointsVector(), img_inc, frame_inc.getCvKeyPointsVector(), 
-                        good_matches, img_matches, cv::Scalar::all(-1),
-                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-                cv::imshow( "Good Matches", img_matches);
-                cv::waitKey(0);
+                std::cout << "ntracked_features: " << ntracked_features << std::endl;
+                showMatches(frame_last, frame_inc, last_map_inc, config);
             }
         }
 
+
+        ////////////////////////
+        // ORB MATCHING OPTION
+        ////////////////////////
         if (config.enable_matcher){
             frame_inc.reset();
             frame_inc.setImg(img_inc);
@@ -164,21 +176,8 @@ int main(int argc, char** argv)
 
 
             if (config.debug){
-                std::cout << "Number of matches" << std::endl;
-                std::cout << nmatched_features << std::endl;
-
-                // Image Display
-                cv::Mat img_matches;
-                good_matches.clear();
-                for (auto & match: last_map_inc){
-                    cv::DMatch dmatch(match.first,match.second,1);
-                    good_matches.push_back(dmatch);
-                }
-                cv::drawMatches(img_last, frame_last.getCvKeyPointsVector(), img_inc, frame_inc.getCvKeyPointsVector(), 
-                        good_matches, img_matches, cv::Scalar::all(-1),
-                        cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-                cv::imshow( "Good Matches", img_matches);
-                cv::waitKey(0);
+                std::cout << "nmatched_features: " << nmatched_features << std::endl;
+                showMatches(frame_last, frame_inc, last_map_inc, config);
             }
         }
 

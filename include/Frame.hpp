@@ -33,6 +33,7 @@ class Frame
         void addKeyPoint(cv::KeyPoint cvkp, cv::Mat desc);
         void removeKeyPoint(KeyPoint kp);
         void removeKeyPointIdx(size_t idx);
+        cv::Mat getImg() const {return _cvimg;}
         void setImg(cv::Mat cvimg);
         void reset();
 
