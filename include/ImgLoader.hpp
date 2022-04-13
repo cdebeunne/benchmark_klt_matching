@@ -19,6 +19,9 @@ std::vector<std::string> EUROC_img_loader(std::string data_path){
         path.erase(remove_if(path.begin(), path.end(), ::isspace), path.end());
         img_list.push_back(path);
     }
+    if (img_list.size() == 0){
+        std::cout << "\n!! No images found with path " << data_path << std::endl;
+    }
     return img_list;
 }
 
