@@ -27,7 +27,20 @@
 #include <numeric>
 #include <filesystem>
 
-int main(int argc, char** argv){
+
+int main(int argc, char** argv)
+{
+
+    if (argc < 2){
+        std::cout << "Missing param file argument!" << std::endl;
+        return -1;
+    }
+    // Load config
+    std::string param_file = argv[1];
+    std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
+    // Load config
+    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
+
 
     Timer timer;
 
@@ -37,11 +50,6 @@ int main(int argc, char** argv){
          0, 457.296, 248.375,
          0, 0, 1;
 
-    // Load config
-    std::string param_file = argv[1];
-    std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
-    // Load config
-    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
 
     // path and loader of the EUROC sequence
     std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);

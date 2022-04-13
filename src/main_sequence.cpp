@@ -46,19 +46,26 @@ std::map<int,int> map_itself(Frame f){
 }
 
 
-int main(int argc, char** argv){
+
+int main(int argc, char** argv)
+{
+
+    if (argc < 2){
+        std::cout << "Missing param file argument!" << std::endl;
+        return -1;
+    }
+    // Load config
+    std::string param_file = argv[1];
+    std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
+    // Load config
+    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
 
     // initialize K
     Eigen::Matrix3f K;
     K << 458.654, 0, 367.215,
          0, 457.296, 248.375,
          0, 0, 1;
-
-    std::string param_file = argv[1];
-    std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
-    // Load config
-    Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
-
+    
     // path and loader of the EUROC sequence
     std::vector<std::string> img_list = EUROC_img_loader(config.dataset_path);
     cv::Mat img_inc, img_last, img_origin;
