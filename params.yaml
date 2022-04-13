@@ -1,12 +1,12 @@
 # Parameter file for benchmarking
-# dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
-dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
+dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
+# dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 
 
 # choose execution mode
 debug: False
-enable_tracker: True
-enable_matcher: False
+enable_tracker: False
+enable_matcher: True
 nimages: 100
 threshold_tracks: 400
 

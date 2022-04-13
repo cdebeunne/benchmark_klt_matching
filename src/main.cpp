@@ -113,7 +113,15 @@ int main(int argc, char** argv)
         if (counter == 0){
             img_last = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             frame_last.setImg(img_last);
-            parallelDetectAndCompute(frame_last, detector, config.nrows, config.ncols);
+            if (config.enable_matcher){
+                timer.start();
+                parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
+                timer.stop();
+            } else{
+                timer.start();
+                parallelDetect(frame_last, detector, config.ncols, config.nrows);
+                timer.stop();
+            }
             counter ++;
             continue;
         }
@@ -190,13 +198,22 @@ int main(int argc, char** argv)
             }
         }
 
-        // Redetect to make frame to frame correspondence
+        // Set last as inc
         img_last = img_inc;
         frame_last.reset();
         frame_last.setImg(img_last);
-        timer.start();
-        parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
-        timer.stop();
+
+        if (config.enable_matcher){
+            timer.start();
+            parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
+            timer.stop();
+        } else{
+            timer.start();
+            parallelDetect(frame_last, detector, config.ncols, config.nrows);
+            timer.stop();
+        }
+        
+
         dt_detect = timer.elapsedSeconds();
         dt_detect_tot += dt_detect;
 
