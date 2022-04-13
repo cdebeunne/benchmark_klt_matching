@@ -65,6 +65,14 @@ int match(std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_cu
         int best_idx = 0;
         float best_score = threshold;
         for (auto & index : indices_in_box){
+
+            // First we check if the octave of the pyramid is similar
+            int octave_curr = kps_curr[index].octave;
+            std::cout << octave_curr << " vs " <<  kp_prev.octave << std::endl;
+            if (octave_curr <  kp_prev.octave-1 || octave_curr > kp_prev.octave){
+                continue;
+            }
+
             cv::Mat descriptor_curr = descriptors_curr.row(index);
             float score = cv::norm(descriptor_prev, descriptor_curr, cv::NORM_HAMMING2);
 
@@ -108,6 +116,12 @@ int match(Frame f_prev, Frame f_curr, std::map<int, int> &prev_map_curr,
         int best_idx = 0;
         float best_score = threshold;
         for (auto & index : indices_in_box){
+
+            int octave_curr = f_curr.getKeyPointIdx(index)._cvKeyPoint.octave;
+            if (octave_curr <  kp_prev._cvKeyPoint.octave-1 || octave_curr > kp_prev._cvKeyPoint.octave){
+                continue;
+            }
+
             cv::Mat descriptor_curr = f_curr.getKeyPointIdx(index)._desc;
             float score = cv::norm(descriptor_prev, descriptor_curr, cv::NORM_HAMMING2);
 
