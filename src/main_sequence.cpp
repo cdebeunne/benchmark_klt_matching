@@ -27,6 +27,13 @@
 #include <numeric>
 #include <filesystem>
 
+
+/*
+Goal of this file:
+Assess the capacity of tracking vs matching in keeping long tracks.
+**/
+
+
 std::map<int, int> merge_map(std::map<int, int> prev_map_curr, std::map<int, int> curr_map_next){
     std::map<int, int> prev_map_next;
     for (auto &match : prev_map_curr){

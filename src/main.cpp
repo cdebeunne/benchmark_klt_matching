@@ -27,6 +27,13 @@
 #include <numeric>
 #include <filesystem>
 
+/*
+Goal of this file:
+Assess the time complexity of different options regarding keypoint detection, 
+tracking, matching.
+**/
+
+
 
 int main(int argc, char** argv)
 {
