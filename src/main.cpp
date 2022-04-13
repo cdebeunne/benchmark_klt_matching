@@ -56,22 +56,7 @@ int main(int argc, char** argv)
     cv::Mat img_inc, img_last;
     Frame frame_last, frame_inc;
 
-    // Initialize the detector
-    cv::Ptr<cv::FeatureDetector> detector;
-    if (config.detector == "fast"){
-        detector = cv::FastFeatureDetector::create(config.threshold_fast);
-    }
-    else if (config.detector == "orb"){
-        int npoints_local = config.npoints / (config.nrows*config.ncols);
-        detector = cv::ORB::create(npoints_local,
-                                   config.scale_factor,
-                                   config.nlevels_pyramids,
-                                   31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
-    }
-    cv::Ptr<cv::FeatureDetector> descriptor = cv::ORB::create(config.npoints,
-                                            config.scale_factor,
-                                            config.nlevels_pyramids,
-                                            31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+    cv::Ptr<cv::FeatureDetector> detector = factoryDetector(config);
 
     // Initialize pertinent data
     double avg_track = 0;
@@ -82,11 +67,11 @@ int main(int argc, char** argv)
     double inliers_match = 0;
     double inliers_track = 0;
 
-    // // Stores results in .csv
-    // std::fstream results;
-    // std::string results_path = "results.csv";
-    // results.open(results_path, std::fstream::out);
-    // results << "iter,inlier,dt\n";
+    // Stores results in .csv
+    std::fstream results;
+    std::string results_path = "results.csv";
+    results.open(results_path, std::fstream::out);
+    results << "iter,inlier,dt\n";
 
     int counter = 0;
     std::string img_path;

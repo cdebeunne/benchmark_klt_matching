@@ -71,18 +71,8 @@ int main(int argc, char** argv)
     cv::Mat img_inc, img_last, img_origin;
 
     // Initialize the detector
-    cv::Ptr<cv::FeatureDetector> detector;
-    if (config.detector == "fast"){
-        bool non_maximum_supression = true;
-        detector = cv::FastFeatureDetector::create(config.threshold_fast, non_maximum_supression);
-    }
-    else if (config.detector == "orb"){
-        int npoints_local = config.npoints / (config.nrows*config.ncols);
-        detector = cv::ORB::create(npoints_local,
-                                   config.scale_factor,
-                                   config.nlevels_pyramids,
-                                   31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
-    }
+    cv::Ptr<cv::FeatureDetector> detector = factoryDetector(config);
+
     Frame frame_origin, frame_last, frame_inc;
     std::map<int, int> origin_map_last, origin_map_inc, last_map_inc;
 

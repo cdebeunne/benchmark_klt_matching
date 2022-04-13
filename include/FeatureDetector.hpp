@@ -13,6 +13,21 @@
 #include <mutex>
 #include <vector>
 
+cv::Ptr<cv::FeatureDetector> factoryDetector(Config config) {
+    if (config.detector == "fast"){
+        return cv::FastFeatureDetector::create(config.threshold_fast);
+    }
+    else if (config.detector == "orb"){
+        int npoints_local = config.npoints / (config.nrows*config.ncols);
+        return cv::ORB::create(npoints_local,
+                                   config.scale_factor,
+                                   config.nlevels_pyramids,
+                                   31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+    }
+    else {
+        throw std::invalid_argument("config.detector value not suppported: "+config.detector);
+    }
+}
 
 void parallelDetect(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int rows, int cols) {
 
