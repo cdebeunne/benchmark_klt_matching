@@ -27,8 +27,8 @@ with open('params.yaml', 'r') as f:
 
 
 # TRACKING
-# params['detector'] = 'fast'  # not working right now
-params['detector'] = 'orb'
+params['detector'] = 'fast'
+# params['detector'] = 'orb'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
 
@@ -58,7 +58,22 @@ plt.legend()
 plt.grid()
 
 
+# experiment with tracking patch size
+patch_sizes = [9,13,17,21]
+plt.figure()
+plt.title('klt patch size trial')
+for ps in patch_sizes:
+    params['klt_patch_size'] = ps
 
+    with open(PARAMS_MOD, 'w') as f:
+        yaml.dump(params, f)
+    df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+    iters_tracking = df.index.to_numpy() 
+    dt_detect_arr = df['dt_detect'].to_numpy()
+    dt_track_arr = df['dt_track'].to_numpy()
+    nb_to_tracks_arr = df['nb_to_tracks'].to_numpy()
+    plt.plot(iters_tracking, dt_track_arr, '.', label=str(ps))
 
+plt.legend()
 
 plt.show()
