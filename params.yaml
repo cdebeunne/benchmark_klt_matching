@@ -1,16 +1,16 @@
 # Parameter file for benchmarking
-# dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
-dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
+dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
+# dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 
 # print stuff, show images (buggy right now)
 debug: False
 
 # choose execution mode (either tracking or matching)
-enable_tracker: True
-enable_matcher: False
+enable_tracker: False
+enable_matcher: True
 
 # number of images to take a look at
-max_nb_frames: 1000
+max_nb_frames: 100
 
 # main_sequence: when the number of tracks drop below this level, detect new features (only implemented for KLT tracking)
 threshold_tracks: 400
@@ -23,7 +23,7 @@ ncols: 1
 # 2 detectors possible: "orb" and "fast"
 # - orb works both for tracking and matching
 # - fast works for tracking and but matching will throw an error since cv::detectAndCompute is not implemented
-detector: "fast"
+detector: "orb"
 threshold_fast: 30
 
 # ORB params
