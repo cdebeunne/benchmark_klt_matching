@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-RUN_FILE = './main_sequence'
+RUN_FILE = './main'
 PARAMS_MOD = 'params_mod.yaml'
-RESULT_FILE = 'build/results.csv'
+RESULT_FILE = 'build/result_tracking_timings.csv'
 
 os.nice(1)
 
@@ -36,31 +36,29 @@ with open(PARAMS_MOD, 'w') as f:
     yaml.dump(params, f)
 
 df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
-iters_tracking, tracks_track = df.index.to_numpy(), df['nTracks'].to_numpy()
-print('tracking done')
-
-
-# MATCHING
-params['detector'] = 'orb'
-params['enable_tracker'] = False
-params['enable_matcher'] = not params['enable_tracker']
-# save a modified parameter file to produce matching results
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
-
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
-iters_matching, tracks_match = df.index.to_numpy(), df['nTracks'].to_numpy()
-print('matching done')
-
+iters_tracking = df.index.to_numpy() 
+dt_detect_arr = df['dt_detect'].to_numpy()
+dt_track_arr = df['dt_track'].to_numpy()
+nb_to_tracks_arr = df['nb_to_tracks'].to_numpy()
 
 plt.figure()
-plt.plot(iters_tracking, tracks_track, 'b', label='tracking')
-plt.plot(iters_matching, tracks_match, 'g', label='matching')
-plt.xlabel('# of frame')
-plt.ylabel('# of tracks alive')
-plt.xlim(0,60)
+plt.title('dt track = f(nb_to_tracks)')
+plt.plot(nb_to_tracks_arr, dt_track_arr, '.')
+plt.xlabel('# of Keypoints to track')
+plt.xlabel('tracking time (ms)')
+plt.grid()
+
+plt.figure()
+plt.title('dt detect and dt track = f(t)')
+plt.plot(iters_tracking, dt_detect_arr, label='detect')
+plt.plot(iters_tracking, dt_track_arr, label='track')
+plt.xlabel('Frame #')
+plt.ylabel('time (ms)')
 plt.legend()
 plt.grid()
+
+
+
 
 
 plt.show()
