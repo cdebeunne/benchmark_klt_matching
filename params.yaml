@@ -6,7 +6,7 @@ dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 # choose execution mode (either tracking or matching)
 debug: False
 enable_tracker: True
-enable_matcher: True
+enable_matcher: False
 nimages: 100
 threshold_tracks: 400
 
@@ -17,7 +17,7 @@ ncols: 1
 # 2 detectors possible: "orb" and "fast"
 # - orb works both for tracking and matching
 # - fast works for tracking and but matching will throw an error since cv::detectAndCompute is not implemented
-detector: "orb"
+detector: "fast"
 threshold_fast: 30
 
 npoints: 1000

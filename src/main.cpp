@@ -114,13 +114,9 @@ int main(int argc, char** argv)
             img_last = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             frame_last.setImg(img_last);
             if (config.enable_matcher){
-                timer.start();
                 parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
-                timer.stop();
             } else{
-                timer.start();
                 parallelDetect(frame_last, detector, config.ncols, config.nrows);
-                timer.stop();
             }
             counter ++;
             continue;
@@ -203,15 +199,13 @@ int main(int argc, char** argv)
         frame_last.reset();
         frame_last.setImg(img_last);
 
+        timer.start();
         if (config.enable_matcher){
-            timer.start();
             parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
-            timer.stop();
         } else{
-            timer.start();
             parallelDetect(frame_last, detector, config.ncols, config.nrows);
-            timer.stop();
         }
+        timer.stop();
         
 
         dt_detect = timer.elapsedSeconds();

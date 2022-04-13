@@ -31,7 +31,7 @@ with open('params.yaml', 'r') as f:
 params['detector'] = 'orb'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
-# save a modified parameter file to produce tracking results
+
 with open(PARAMS_MOD, 'w') as f:
     yaml.dump(params, f)
 

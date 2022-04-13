@@ -104,7 +104,11 @@ int main(int argc, char** argv)
         if (counter == 0){
             img_origin = cv::imread(img_path, cv::IMREAD_GRAYSCALE);
             frame_origin.setImg(img_origin);
-            parallelDetectAndCompute(frame_origin, detector, config.nrows, config.ncols);
+            if (config.enable_matcher){
+                parallelDetectAndCompute(frame_last, detector, config.ncols, config.nrows);
+            } else{
+                parallelDetect(frame_last, detector, config.ncols, config.nrows);
+            }            
             frame_last = frame_origin;
             origin_map_last = map_itself(frame_origin);
 
