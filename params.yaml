@@ -2,13 +2,19 @@
 # dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
 dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 
+# print stuff, show images (buggy right now)
+debug: False
 
 # choose execution mode (either tracking or matching)
-debug: False
 enable_tracker: True
 enable_matcher: False
+
+# number of images to take a look at
 max_nb_frames: 1000
+
+# main_sequence: when the number of tracks drop below this level, detect new features (only implemented for KLT tracking)
 threshold_tracks: 400
+
 
 # Parameters of the keypoint detector
 nrows: 1
@@ -20,19 +26,17 @@ ncols: 1
 detector: "fast"
 threshold_fast: 30
 
-npoints: 1000
+# ORB params
+nb_orb_detected: 1000
 scale_factor: 1.2
 nlevels_pyramids: 8
 
-# Parameters feature tracker
-
-tracker_width: 21
-tracker_height: 21
+# Lucas Kanade tracker params
+klt_patch_size: 21
 klt_max_err: 0.2
 nlevels_pyramids_klt: 3
 
-# Parameters feature matcher
-
+# Feature matching params
 matcher_width: 21
 matcher_height: 21
 threshold_matching: 64

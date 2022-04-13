@@ -11,12 +11,11 @@ struct Config {
     int nrows;
     int ncols;
     int threshold_fast;
-    int npoints;
+    int nb_orb_detected;
     float scale_factor;
     int nlevels_pyramids;
 
-    int tracker_width;
-    int tracker_height;
+    int klt_patch_size;
     int nlevels_pyramids_klt;
     float klt_max_err;
 
@@ -48,13 +47,12 @@ Config readParameterFile(const std::string path){
     config.ncols = yaml_file["ncols"].as<int>();
     config.detector = yaml_file["detector"].as<std::string>();
     config.threshold_fast = yaml_file["threshold_fast"].as<int>();
-    config.npoints = yaml_file["npoints"].as<int>();
+    config.nb_orb_detected = yaml_file["nb_orb_detected"].as<int>();
     config.scale_factor = yaml_file["scale_factor"].as<float>();
     config.nlevels_pyramids = yaml_file["nlevels_pyramids"].as<int>();
 
     // Config tracker
-    config.tracker_width = yaml_file["tracker_width"].as<int>();
-    config.tracker_height = yaml_file["tracker_height"].as<int>();
+    config.klt_patch_size = yaml_file["klt_patch_size"].as<int>();
     config.nlevels_pyramids_klt = yaml_file["nlevels_pyramids_klt"].as<int>();
     config.klt_max_err = yaml_file["klt_max_err"].as<float>();
 

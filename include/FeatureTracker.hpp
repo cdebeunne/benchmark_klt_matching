@@ -13,7 +13,7 @@
 #include <vector>
 
 int track(cv::Mat img_prev, cv::Mat img_curr, std::vector<cv::KeyPoint> &kps_prev, std::vector<cv::KeyPoint> &kps_curr,
-           int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.){
+           int klt_patch_size = 21, int pyramid_level = 3, float klt_max_err = 50.){
     
     // Create cv point list for tracking, we initialize optical flow with previous keypoints
     std::vector<cv::Point2f> p2f_curr, p2f_prev;
@@ -35,7 +35,7 @@ int track(cv::Mat img_prev, cv::Mat img_curr, std::vector<cv::KeyPoint> &kps_pre
             p2f_prev,
             p2f_curr,
             status, err,
-            {search_width, search_height}, 
+            {klt_patch_size, klt_patch_size}, 
             pyramid_level,
             crit,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
@@ -70,7 +70,7 @@ int track(cv::Mat img_prev, cv::Mat img_curr, std::vector<cv::KeyPoint> &kps_pre
             p2f_curr_new,
             p2f_prev_new,
             status_back, err_back,
-            {search_width, search_height}, 
+            {klt_patch_size, klt_patch_size}, 
             pyramid_level,
             crit,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
@@ -123,7 +123,7 @@ int track(cv::Mat img_prev, cv::Mat img_curr, std::vector<cv::KeyPoint> &kps_pre
 }
 
 int track(Frame &f_prev, Frame &f_curr, std::map<int, int> &prev_map_curr,
-          int search_width = 21, int search_height = 21, int pyramid_level = 3, float klt_max_err = 50.){
+          int klt_patch_size = 21, int pyramid_level = 3, float klt_max_err = 50.){
     
     // Create cv point list for tracking, we initialize optical flow with previous keypoints
     std::vector<cv::Point2f> p2f_prev = f_prev.getP2fVector();
@@ -145,7 +145,7 @@ int track(Frame &f_prev, Frame &f_curr, std::map<int, int> &prev_map_curr,
             p2f_prev,
             p2f_curr,
             status, err,
-            {search_width, search_height}, 
+            {klt_patch_size, klt_patch_size}, 
             pyramid_level,
             crit,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));
@@ -160,7 +160,7 @@ int track(Frame &f_prev, Frame &f_curr, std::map<int, int> &prev_map_curr,
             p2f_curr,
             p2f_prev,
             status_back, err_back,
-            {search_width, search_height}, 
+            {klt_patch_size, klt_patch_size}, 
             pyramid_level,
             crit,
             (cv::OPTFLOW_USE_INITIAL_FLOW + cv::OPTFLOW_LK_GET_MIN_EIGENVALS));

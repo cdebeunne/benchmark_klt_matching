@@ -18,11 +18,11 @@ cv::Ptr<cv::FeatureDetector> factoryDetector(Config config) {
         return cv::FastFeatureDetector::create(config.threshold_fast);
     }
     else if (config.detector == "orb"){
-        int npoints_local = config.npoints / (config.nrows*config.ncols);
-        return cv::ORB::create(npoints_local,
-                                   config.scale_factor,
-                                   config.nlevels_pyramids,
-                                   31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
+        int nb_orb_detected_local = config.nb_orb_detected / (config.nrows*config.ncols);
+        return cv::ORB::create(nb_orb_detected_local,
+                               config.scale_factor,
+                               config.nlevels_pyramids,
+                               31, 0, 2, cv::ORB::FAST_SCORE, 31, 20);
     }
     else {
         throw std::invalid_argument("config.detector value not suppported: "+config.detector);

@@ -134,7 +134,7 @@ int main(int argc, char** argv)
             timer.start();
             std::map<int, int> last_map_inc;
             int ntracked_features = track(frame_last, frame_inc, last_map_inc,
-                                    config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
+                                    config.klt_patch_size, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
             timer.stop();
             dt_track = timer.elapsedSeconds();

@@ -97,8 +97,9 @@ int main(int argc, char** argv)
     std::string img_path;
 
     for (const auto & img_name : img_list){
-        img_path = config.dataset_path + "/data/" + img_name;
         if (counter > config.max_nb_frames) break;
+
+        img_path = config.dataset_path + "/data/" + img_name;
 
         // Origin init
         if (counter == 0){
@@ -124,7 +125,7 @@ int main(int argc, char** argv)
         if (config.enable_tracker){
             last_map_inc.clear();
             int ntracked_features = track(frame_last, frame_inc, last_map_inc,
-                                    config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
+                                    config.klt_patch_size, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
 
 
@@ -134,7 +135,7 @@ int main(int argc, char** argv)
                 frame_inc.reset();
                 parallelDetect(frame_last, detector, config.nrows, config.ncols);
                 ntracked_features = track(frame_last, frame_inc, last_map_inc,
-                                    config.tracker_width, config.tracker_height, config.nlevels_pyramids_klt,
+                                    config.klt_patch_size, config.nlevels_pyramids_klt,
                                     config.klt_max_err);
                 frame_origin = frame_last;
                 origin_map_last = map_itself(frame_origin);
