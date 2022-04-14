@@ -44,9 +44,6 @@ KeyPoint Frame::getKeyPointIdx(size_t idx) const{
     return _mapkps.at(idx);
 }
 
-cv::Mat Frame::getCvImage() const{
-    return _cvimg;
-}
 
 void Frame::addKeyPoint(KeyPoint kp){
 
@@ -82,10 +79,6 @@ void Frame::removeKeyPoint(KeyPoint kp){
 
 void Frame::removeKeyPointIdx(size_t idx){
     _mapkps.erase(idx);
-}
-
-void Frame::setImg(cv::Mat img){
-    _cvimg = img;
 }
 
 void Frame::reset(){

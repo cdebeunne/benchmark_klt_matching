@@ -128,8 +128,8 @@ int track(Frame &f_prev, Frame &f_curr, std::map<int, int> &prev_map_curr,
     // Create cv point list for tracking, we initialize optical flow with previous keypoints
     std::vector<cv::Point2f> p2f_prev = f_prev.getP2fVector();
     std::vector<cv::Point2f> p2f_curr = p2f_prev;
-    cv::Mat img_prev = f_prev.getCvImage();
-    cv::Mat img_curr = f_curr.getCvImage();
+    cv::Mat img_prev = f_prev.getImg();
+    cv::Mat img_curr = f_curr.getImg();
     std::vector<size_t> indices_prev = f_prev.getKeyPointIndices();
 
     // Configure and process KLT optical flow research

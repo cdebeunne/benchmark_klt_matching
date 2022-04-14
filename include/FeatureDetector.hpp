@@ -31,7 +31,7 @@ cv::Ptr<cv::FeatureDetector> factoryDetector(Config config) {
 
 void parallelDetect(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int rows, int cols) {
 
-    cv::Mat img = f.getCvImage();
+    cv::Mat img = f.getImg();
     std::vector<cv::KeyPoint> keypoints;
     int w = img.cols / cols;
     int h = img.rows / rows;
@@ -101,7 +101,7 @@ void parallelDetect(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int rows, i
 
 void parallelDetectAndCompute(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int cols, int rows) {
 
-    cv::Mat img = f.getCvImage();
+    cv::Mat img = f.getImg();
     std::vector<cv::KeyPoint> keypoints;
     cv::Mat descriptors;
     int w = img.cols / cols;
