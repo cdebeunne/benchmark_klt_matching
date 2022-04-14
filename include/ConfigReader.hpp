@@ -2,6 +2,7 @@
 #define CONFIGREADER_H
 
 #include <yaml-cpp/yaml.h>
+#include <iostream>
 
 // This structure contains the configuration parameters located in the config file.
 struct Config {
@@ -18,6 +19,9 @@ struct Config {
     int klt_patch_size;
     int nlevels_pyramids_klt;
     float klt_max_err;
+    bool precompute_pyramids;
+    bool pyr_with_derivatives;
+    bool klt_use_backward;
 
     int matcher_width;
     int matcher_height;
@@ -53,14 +57,17 @@ Config readParameterFile(const std::string path){
 
     // Config tracker
     config.klt_patch_size = yaml_file["klt_patch_size"].as<int>();
-    config.nlevels_pyramids_klt = yaml_file["nlevels_pyramids_klt"].as<int>();
     config.klt_max_err = yaml_file["klt_max_err"].as<float>();
+    config.nlevels_pyramids_klt = yaml_file["nlevels_pyramids_klt"].as<int>();
+    config.precompute_pyramids = yaml_file["precompute_pyramids"].as<bool>();
+    config.pyr_with_derivatives = yaml_file["pyr_with_derivatives"].as<bool>();
+    config.klt_use_backward = yaml_file["klt_use_backward"].as<bool>();
 
     // Config matcher
     config.matcher_width = yaml_file["matcher_width"].as<int>();
     config.matcher_height = yaml_file["matcher_height"].as<int>();
     config.threshold_matching = yaml_file["threshold_matching"].as<float>();
-
+    
     return config;
 }
 

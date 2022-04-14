@@ -6,8 +6,8 @@ dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 debug: False
 
 # choose execution mode (either tracking or matching)
-enable_tracker: False
-enable_matcher: True
+enable_tracker: True
+enable_matcher: False
 
 # number of images to take a look at
 max_nb_frames: 100
@@ -23,7 +23,7 @@ ncols: 1
 # 2 detectors possible: "orb" and "fast"
 # - orb works both for tracking and matching
 # - fast works for tracking and but matching will throw an error since cv::detectAndCompute is not implemented
-detector: "orb"
+detector: "fast"
 threshold_fast: 30
 
 # ORB params
@@ -35,6 +35,9 @@ nlevels_pyramids: 8
 klt_patch_size: 15
 klt_max_err: 0.2
 nlevels_pyramids_klt: 3
+precompute_pyramids: False
+pyr_with_derivatives: False
+klt_use_backward: False
 
 # Feature matching params
 matcher_width: 21

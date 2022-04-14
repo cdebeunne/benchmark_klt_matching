@@ -124,9 +124,7 @@ int main(int argc, char** argv)
 
         if (config.enable_tracker){
             last_map_inc.clear();
-            int ntracked_features = track(frame_last, frame_inc, last_map_inc,
-                                    config.klt_patch_size, config.nlevels_pyramids_klt,
-                                    config.klt_max_err);
+            int ntracked_features = track(frame_last, frame_inc, last_map_inc, config);
 
 
             if (ntracked_features < config.threshold_tracks){
@@ -134,9 +132,7 @@ int main(int argc, char** argv)
                 last_map_inc.clear();
                 frame_inc.reset();
                 parallelDetect(frame_last, detector, config.nrows, config.ncols);
-                ntracked_features = track(frame_last, frame_inc, last_map_inc,
-                                    config.klt_patch_size, config.nlevels_pyramids_klt,
-                                    config.klt_max_err);
+                ntracked_features = track(frame_last, frame_inc, last_map_inc, config);
                 frame_origin = frame_last;
                 origin_map_last = map_itself(frame_origin);
             }

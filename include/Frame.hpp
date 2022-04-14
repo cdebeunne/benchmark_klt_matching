@@ -34,11 +34,11 @@ class Frame
         void removeKeyPoint(KeyPoint kp);
         void removeKeyPointIdx(size_t idx);
 
-        cv::Mat getImg() const {return _cvimg;}
+        const cv::Mat& getImg() const {return _cvimg;}
         void setImg(cv::Mat cvimg) {_cvimg = cvimg;}
 
-        std::vector<cv::Mat> getImgPyr() const {return _img_pyr;}
-        void getImgPyr(std::vector<cv::Mat> img_pyr) {_img_pyr = img_pyr;}
+        const std::vector<cv::Mat>& getImgPyr() const {return _img_pyr;}
+        void setImgPyr(const std::vector<cv::Mat>& img_pyr) {_img_pyr = img_pyr;}
 
         void reset();
 

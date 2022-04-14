@@ -65,6 +65,7 @@ int main(int argc, char** argv)
     std::cout << "parameter file full path: " << std::filesystem::current_path().string()+"/../"+param_file << std::endl;
     // Load config
     Config config = readParameterFile(std::filesystem::current_path().string()+"/../"+param_file);
+    std::cout << "Config read successfully" << std::endl;
 
 
     Timer timer;
@@ -133,9 +134,7 @@ int main(int argc, char** argv)
             nb_to_tracks = frame_last.getMap().size();
             timer.start();
             std::map<int, int> last_map_inc;
-            int ntracked_features = track(frame_last, frame_inc, last_map_inc,
-                                    config.klt_patch_size, config.nlevels_pyramids_klt,
-                                    config.klt_max_err);
+            int ntracked_features = track(frame_last, frame_inc, last_map_inc, config);
             timer.stop();
             dt_track = timer.elapsedSeconds();
             dt_track_tot += dt_track;
