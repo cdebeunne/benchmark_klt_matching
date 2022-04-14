@@ -117,8 +117,9 @@ int match(Frame f_prev, Frame f_curr, std::map<int, int> &prev_map_curr,
         float best_score = threshold;
         for (auto & index : indices_in_box){
 
-            int octave_curr = f_curr.getKeyPointIdx(index)._cvKeyPoint.octave;
-            if (octave_curr <  kp_prev._cvKeyPoint.octave-1 || octave_curr > kp_prev._cvKeyPoint.octave){
+            // Check if the octaves are similar
+            if (f_curr.getKeyPointIdx(index)._cvKeyPoint.octave <  kp_prev._cvKeyPoint.octave-1 
+                || f_curr.getKeyPointIdx(index)._cvKeyPoint.octave > kp_prev._cvKeyPoint.octave){
                 continue;
             }
 
