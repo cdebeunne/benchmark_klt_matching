@@ -1,9 +1,9 @@
 # Parameter file for benchmarking
-# dataset_path: "/home/cesar/Documents/phd/datasets/EUROC/MH_01_easy/mav0/cam0"
-dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
+dataset_path: "/media/ce.debeunne/HDD/datasets/EUROC/MH_01_easy/mav0/cam0"
+# dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 
 # print stuff, show images (buggy right now)
-debug: False
+debug: True
 
 # choose execution mode (either tracking or matching)
 enable_tracker: True
@@ -15,7 +15,6 @@ max_nb_frames: 20
 # main_sequence: when the number of tracks drop below this level, detect new features (only implemented for KLT tracking)
 threshold_tracks: 400
 
-
 # Parameters of the keypoint detector
 nrows: 1
 ncols: 1
@@ -24,7 +23,7 @@ ncols: 1
 # - orb works both for tracking and matching
 # - fast works for tracking and but matching will throw an error since cv::detectAndCompute is not implemented
 detector: "fast"
-threshold_fast: 30
+threshold_fast: 20
 
 # ORB params
 nb_orb_detected: 1000
@@ -37,7 +36,7 @@ klt_max_err: 0.2
 nlevels_pyramids_klt: 3
 precompute_pyramids: False
 pyr_with_derivatives: False
-klt_use_backward: False
+klt_use_backward: True
 
 # Feature matching params
 matcher_width: 21

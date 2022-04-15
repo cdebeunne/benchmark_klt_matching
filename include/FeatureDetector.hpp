@@ -61,8 +61,8 @@ void parallelDetect(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int rows, i
             width = w + 2 * border;
         }
 
-        cv::Rect RectangleToSelect(x, y, width, height);
-        cv::Mat I = img(RectangleToSelect);
+        cv::Rect roi(x, y, width, height);
+        cv::Mat I = img(roi);
 
         std::vector<cv::KeyPoint> keypoints_local;
         cv::Mat descriptors_local;
@@ -95,6 +95,66 @@ void parallelDetect(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int rows, i
 
     for (size_t i = 0; i<keypoints.size(); i++){
         f.addKeyPoint(keypoints.at(i));
+    }
+
+}
+
+bool compare_response(cv::KeyPoint first, cv::KeyPoint second) {
+    return first.response > second.response;
+}
+
+void parallelDetectGrid(Frame &f, cv::Ptr<cv::FeatureDetector> detector, int cellsize) {
+
+    cv::Mat img = f.getImg();
+
+    size_t nwcells = img.cols / cellsize;
+    size_t nhcells = img.rows / cellsize;
+    size_t ncells = nwcells * nhcells;
+
+    // We allocate one keypoint per cell
+    std::vector<cv::KeyPoint> keypoints;
+    keypoints.reserve(ncells);
+
+    // Define local detection function
+    std::mutex mtx;
+    auto detectComputeSmall = [ncells, nwcells, nhcells, cellsize, detector, img, &keypoints](
+            size_t ncell) {
+        
+        size_t r = std::floor(ncell / nwcells);
+        size_t c = ncell % nwcells;
+        size_t x = c*cellsize;
+        size_t y = r*cellsize;
+
+        cv::Rect roi(x, y, cellsize, cellsize);
+        
+        if( x+cellsize < img.cols-1 && y+cellsize < img.rows-1 ) {
+
+            std::vector<cv::KeyPoint> keypoints_local;
+            detector->detect(img(roi), keypoints_local);
+
+            if (!keypoints_local.empty()) {
+                std::cout << ncell << std::endl;
+                std::cout << keypoints.size() << std::endl;
+                std::sort(keypoints_local.begin(), keypoints_local.end(), compare_response);
+                if(keypoints_local.at(0).response >= 20) {
+                    keypoints.at(ncell) = keypoints_local.at(0);
+                }
+            }
+        }
+    };
+
+    // Launch on different threads the local detections
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < ncells; ++i) {
+        threads.push_back(std::thread(detectComputeSmall, i));
+    }
+    for (auto &th : threads) {
+        th.join();
+    }
+
+    for (size_t i = 0; i<keypoints.size(); i++){
+        cv::KeyPoint kp = keypoints.at(i);
+        f.addKeyPoint(kp);
     }
 
 }
@@ -132,8 +192,8 @@ void parallelDetectAndCompute(Frame &f, cv::Ptr<cv::FeatureDetector> detector, i
             width = w + 2 * border;
         }
 
-        cv::Rect RectangleToSelect(x, y, width, height);
-        cv::Mat I = img(RectangleToSelect);
+        cv::Rect roi(x, y, width, height);
+        cv::Mat I = img(roi);
 
         std::vector<cv::KeyPoint> keypoints_local;
         cv::Mat descriptors_local;
