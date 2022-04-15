@@ -10,7 +10,7 @@ enable_tracker: True
 enable_matcher: False
 
 # number of images to take a look at
-max_nb_frames: 100
+max_nb_frames: 20
 
 # main_sequence: when the number of tracks drop below this level, detect new features (only implemented for KLT tracking)
 threshold_tracks: 400
@@ -45,3 +45,8 @@ matcher_height: 21
 threshold_matching: 64
 
 
+###########################
+# For main_detect_grid only
+###########################
+nb_cells_h: 2
+nb_cells_v: 2

@@ -5,21 +5,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from utils import run_sequence
+
+
 RUN_FILE = './main'
 PARAMS_MOD = 'params_mod.yaml'
 RESULT_FILE = 'build/result_tracking_timings.csv'
 
 os.nice(1)
-
-
-def run_sequence(run_file, param_file_name, result_file):
-    # do this stupid chdir twice before main
-    # is not in the same place as the python script    
-    os.chdir('build')
-    subprocess.run([run_file, param_file_name])
-    os.chdir('..')
-    df = pd.read_csv(result_file)
-    return df
 
 
 # load the default parameters, this file won't be modified, to preserve its formatting

@@ -32,6 +32,9 @@ struct Config {
     bool enable_matcher;
     int max_nb_frames;
     int threshold_tracks;
+
+    int nb_cells_h;
+    int nb_cells_v;
 };
 
 Config readParameterFile(const std::string path){
@@ -67,6 +70,10 @@ Config readParameterFile(const std::string path){
     config.matcher_width = yaml_file["matcher_width"].as<int>();
     config.matcher_height = yaml_file["matcher_height"].as<int>();
     config.threshold_matching = yaml_file["threshold_matching"].as<float>();
+
+    // Experiment detect in cell grid
+    config.nb_cells_h = yaml_file["nb_cells_h"].as<float>();
+    config.nb_cells_v = yaml_file["nb_cells_v"].as<float>();
     
     return config;
 }

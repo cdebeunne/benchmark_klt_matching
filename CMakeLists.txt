@@ -41,3 +41,6 @@ target_link_libraries(main ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES} F
 
 add_executable(main_sequence src/main_sequence.cpp)
 target_link_libraries(main_sequence ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES} Frame)
+
+add_executable(main_detect_grid src/main_detect_grid.cpp)
+target_link_libraries(main_detect_grid ${OpenCV_LIBS} ${EIGEN3_LIBS} ${YAML_CPP_LIBRARIES})

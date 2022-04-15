@@ -99,10 +99,10 @@ int main(int argc, char** argv)
     double nb_to_tracks = 0;
 
     // Stores tracking results in .csv
-    std::fstream results_tracking;
+    std::fstream results;
     std::string results_path = "result_tracking_timings.csv";
-    results_tracking.open(results_path, std::fstream::out);
-    results_tracking << "dt_detect,dt_track,nb_to_tracks\n";
+    results.open(results_path, std::fstream::out);
+    results << "dt_detect,dt_track,nb_to_tracks\n";
 
     int counter = 0;
     std::string img_path;
@@ -212,7 +212,7 @@ int main(int argc, char** argv)
 
 
         // store result in csv
-        results_tracking << dt_detect << ","
+        results << dt_detect << ","
                          << dt_track << ","
                          << nb_to_tracks << "\n";
 
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
     std::cout << dt_match_tot << std::endl;
 
 
-    results_tracking.close();
+    results.close();
 
 
     return 0;
