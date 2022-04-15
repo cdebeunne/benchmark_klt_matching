@@ -51,6 +51,14 @@ void showMatches(const Frame& frame_last, const Frame& frame_inc, const std::map
     cv::waitKey(0);
 }
 
+void showKeyPoint(const Frame& frame_last)
+{
+    cv::Mat img_keypoints;
+    cv::drawKeypoints(frame_last.getImg(), frame_last.getCvKeyPointsVector(), img_keypoints, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT );
+    cv::imshow("Keypoints 1", img_keypoints);
+    cv::waitKey(0);
+}
+
 
 
 int main(int argc, char** argv)
@@ -153,7 +161,8 @@ int main(int argc, char** argv)
 
             if (config.debug){
                 std::cout << "ntracked_features: " << ntracked_features << std::endl;
-                showMatches(frame_last, frame_inc, last_map_inc, config);
+                // showMatches(frame_last, frame_inc, last_map_inc, config);
+                showKeyPoint(frame_last);
             }
 
         }
