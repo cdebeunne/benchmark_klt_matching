@@ -1,8 +1,8 @@
 # Parameter file for benchmarking
-dataset_path: "/media/ce.debeunne/HDD/datasets/EUROC/MH_01_easy/mav0/cam0"
-# dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
+# dataset_path: "/media/ce.debeunne/HDD/datasets/EUROC/MH_01_easy/mav0/cam0"
+dataset_path: "/home/mfourmy/Documents/Phd_LAAS/data/Euroc/MH_01_easy/mav0/cam0"
 
-# print stuff, show images (buggy right now)
+# print stuff, show images
 debug: True
 
 # choose execution mode (either tracking or matching)
@@ -10,7 +10,7 @@ enable_tracker: True
 enable_matcher: False
 
 # number of images to take a look at
-max_nb_frames: 20
+max_nb_frames: 200
 
 # main_sequence: when the number of tracks drop below this level, detect new features (only implemented for KLT tracking)
 threshold_tracks: 400

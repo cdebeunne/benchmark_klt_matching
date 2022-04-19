@@ -28,10 +28,7 @@ params['detector'] = 'fast'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
 
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
-
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 iters_tracking = df.index.to_numpy() 
 dt_detect_arr = df['dt_detect'].to_numpy()
 dt_track_arr = df['dt_track'].to_numpy()
@@ -63,7 +60,7 @@ for i, ps in enumerate(patch_sizes):
 
     with open(PARAMS_MOD, 'w') as f:
         yaml.dump(params, f)
-    df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+    df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
     iters_tracking = df.index.to_numpy() 
     dt_detect_arr = df['dt_detect'].to_numpy()
     dt_track_arr = df['dt_track'].to_numpy()
@@ -86,7 +83,7 @@ for i, pl in enumerate(pyramid_levels):
 
     with open(PARAMS_MOD, 'w') as f:
         yaml.dump(params, f)
-    df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+    df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
     iters_tracking = df.index.to_numpy() 
     dt_detect_arr = df['dt_detect'].to_numpy()
     dt_track_arr = df['dt_track'].to_numpy()

@@ -21,22 +21,20 @@ with open('params.yaml', 'r') as f:
 
 
 # Basic TRACKING Parameters
+params['debug'] = False
 params['detector'] = 'fast'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
 params['klt_use_backward'] = False
 
 
-plt.figure()
+plt.figure('Compar with or without pyramid precomputation')
 
 # Different KLT configurations
 # 1) no pre-building of the pyramids
 params['precompute_pyramids'] = False
 
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
-
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='no_prepyr')
 
 
@@ -44,10 +42,7 @@ plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='n
 params['precompute_pyramids'] = True
 params['pyr_with_derivatives'] = False
 
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
-
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='prepyr_nograd')
 
 
@@ -55,11 +50,29 @@ plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='p
 params['precompute_pyramids'] = True
 params['pyr_with_derivatives'] = True
 
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
-
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='prepyr_with_grad')
+
+plt.xlabel('# of Keypoints to track')
+plt.ylabel('tracking time (s)')
+plt.legend()
+plt.grid()
+
+
+# 4) Backward pass?
+plt.figure('Backward pass: with or without?')
+
+# WITH
+params['precompute_pyramids'] = False
+params['klt_use_backward'] = True
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
+plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='With bwd')
+
+# WITHOUT
+params['precompute_pyramids'] = False
+params['klt_use_backward'] = False
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
+plt.plot(df['nb_to_tracks'].to_numpy(), df['dt_track'].to_numpy(), '.', label='Withou bwd')
 
 plt.xlabel('# of Keypoints to track')
 plt.ylabel('tracking time (s)')

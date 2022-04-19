@@ -26,10 +26,8 @@ params['detector'] = 'fast'  # not working right now
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
 # save a modified parameter file to produce tracking results
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
 
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 iters_tracking, tracks_track = df.index.to_numpy(), df['nTracks'].to_numpy()
 print('tracking done')
 
@@ -39,10 +37,8 @@ params['detector'] = 'orb'
 params['enable_tracker'] = False
 params['enable_matcher'] = not params['enable_tracker']
 # save a modified parameter file to produce matching results
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
 
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 iters_matching, tracks_match = df.index.to_numpy(), df['nTracks'].to_numpy()
 print('matching done')
 

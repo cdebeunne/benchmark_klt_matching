@@ -26,24 +26,21 @@ params['detector'] = 'fast'
 params['enable_tracker'] = True
 params['enable_matcher'] = not params['enable_tracker']
 
-with open(PARAMS_MOD, 'w') as f:
-    yaml.dump(params, f)
-
-df = run_sequence(RUN_FILE, PARAMS_MOD, RESULT_FILE)
+df = run_sequence(RUN_FILE, PARAMS_MOD, params, RESULT_FILE)
 iters = df.index.to_numpy() 
 dt_detect_global = df['dt_detect_global'].to_numpy()
 dt_detect_grid = df['dt_detect_grid'].to_numpy()
 nb_global = df['nb_global'].to_numpy()
 nb_grid = df['nb_grid'].to_numpy()
 
-# plt.figure()
-# plt.title('Time taken for KeyPoints detection = f(t)')
-# plt.plot(iters, dt_detect_global, '.', label='global')
-# plt.plot(iters, dt_detect_grid, '.', label='grid')
-# plt.xlabel('Frame #')
-# plt.ylabel('Detection time (s)')
-# plt.grid()
-# plt.legend()
+plt.figure()
+plt.title('Time taken for KeyPoints detection = f(t)')
+plt.plot(iters, dt_detect_global, '.', label='global')
+plt.plot(iters, dt_detect_grid, '.', label='grid')
+plt.xlabel('Frame #')
+plt.ylabel('Detection time (s)')
+plt.grid()
+plt.legend()
 
 plt.figure()
 plt.title('Overhead of grid based detection = f(t)')
@@ -53,14 +50,14 @@ plt.ylabel('Detection time (s)')
 plt.grid()
 plt.legend()
 
-# plt.figure()
-# plt.title('Number of detection in each frame = f(t)')
-# plt.plot(iters, nb_global, '.', label='global')
-# plt.plot(iters, nb_grid, '.', label='grid')
-# plt.xlabel('Frame #')
-# plt.ylabel('# of detections')
-# plt.grid()
-# plt.legend()
+plt.figure()
+plt.title('Number of detection in each frame = f(t)')
+plt.plot(iters, nb_global, '.', label='global')
+plt.plot(iters, nb_grid, '.', label='grid')
+plt.xlabel('Frame #')
+plt.ylabel('# of detections')
+plt.grid()
+plt.legend()
 
 
 plt.figure()
